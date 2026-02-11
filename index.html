@@ -1,0 +1,4451 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Laku Solo</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #5D1919;
+            --primary-light: #7A2222;
+            --accent: #FFD700;
+            --bg-body: #F5F5F5;
+            --white: #FFFFFF;
+            --text-dark: #333333;
+            --text-gray: #888888;
+            --shadow-soft: 0 4px 15px rgba(0,0,0,0.05);
+            --shadow-card: 0 2px 8px rgba(0,0,0,0.1);
+            --success: #4CAF50;
+            --error: #D32F2F;
+            --info-bg: #E3F2FD;
+            --info-text: #1565C0;
+            /* CHAT THEME LAKU SOLO */
+            --chat-bg: #F2EBE5; /* Krem lembut */
+            --chat-bubble-me: #7A2222; /* Merah Laku Solo */
+            --chat-bubble-other: #FFFFFF;
+            --chat-tick-read: #FFD700; /* Gold */
+            --chat-tick-sent: #B0B0B0; /* Gray */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* HIDE SCROLLBARS GLOBALLY BUT KEEP FUNCTIONALITY */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-body);
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding-bottom: 90px;
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            width: 90%;
+            max-width: 400px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: rgba(40, 40, 40, 0.95);
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+            animation: slideInDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .toast.hiding {
+            animation: fadeOutUp 0.3s forwards;
+        }
+
+        .toast.error {
+            background: rgba(211, 47, 47, 0.95); /* Red */
+        }
+
+        .toast.success {
+            background: rgba(56, 142, 60, 0.95); /* Green */
+        }
+
+        .toast i {
+            font-size: 18px;
+        }
+
+        @keyframes slideInDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeOutUp {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-20px); opacity: 0; }
+        }
+
+        /* --- CUSTOM CONFIRM MODAL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(3px);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-box {
+            background: var(--white);
+            width: 85%;
+            max-width: 320px;
+            padding: 30px 25px;
+            border-radius: 25px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: #FFEBEE;
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 24px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 25px;
+            line-height: 1.5;
+            padding: 0 10px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.2s;
+        }
+
+        .modal-btn:active { filter: brightness(0.9); }
+
+        .btn-cancel {
+            background: #F0F0F0;
+            color: var(--text-gray);
+        }
+
+        .btn-confirm {
+            background: var(--primary);
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(93, 25, 25, 0.3);
+        }
+
+        /* --- PRODUCT WEIGHT MODAL (BOTTOM SHEET) --- */
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--white);
+            z-index: 10001;
+            border-top-left-radius: 25px;
+            border-top-right-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.15);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+
+        .sheet-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .sheet-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .sheet-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .sheet-info p {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .qty-control-wrapper {
+            background: #F9F9F9;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: space-between;
+        }
+
+        .preset-btn {
+            flex: 1;
+            padding: 8px 5px;
+            font-size: 11px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .qty-adjuster {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border-radius: 12px;
+            padding: 5px;
+            border: 1px solid #eee;
+        }
+
+        .qty-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: var(--primary);
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .qty-btn:active { transform: scale(0.9); }
+
+        .qty-input-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        /* REMOVE SPINNER FROM INPUT NUMBER */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .qty-input {
+            width: 70px;
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-align: right;
+            outline: none;
+            padding: 0;
+        }
+
+        .unit-label {
+            font-size: 14px;
+            color: var(--text-gray);
+            font-weight: 500;
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .total-preview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            margin-top: 5px;
+        }
+
+        .total-label { font-size: 12px; color: var(--text-gray); }
+        .total-value { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+        .btn-sheet-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(93, 25, 25, 0.3);
+        }
+
+        .sheet-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: none;
+            backdrop-filter: blur(2px);
+        }
+        .sheet-overlay.active { display: block; }
+
+
+        /* --- VIEWS UTILITY --- */
+        .view-section {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- LOGIN VIEW --- */
+        #login-view {
+            min-height: 100vh;
+            background: var(--primary);
+            /* display: flex; REMOVED to allow toggling */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 30px;
+            text-align: center;
+            color: var(--white);
+            position: relative;
+            overflow-y: auto; /* Allow scroll for long form */
+            z-index: 200;
+        }
+
+        /* Only show flex when active */
+        #login-view.active {
+            display: flex;
+        }
+
+        #login-view::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(#7A2222 15%, transparent 16%);
+            background-size: 25px 25px;
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .login-content-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .login-logo {
+            font-size: 48px;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .login-subtitle {
+            font-size: 13px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .login-form {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .form-header {
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            text-align: left;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            background: rgba(255,255,255,0.95);
+            color: var(--text-dark);
+            transition: all 0.3s;
+        }
+        
+        .login-input.hidden {
+            display: none;
+        }
+
+        .login-input:focus {
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.4);
+            outline: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            background-color: var(--accent);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            margin-top: 10px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .login-btn:disabled {
+            background-color: #999;
+            color: #ddd;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .auth-toggle {
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--white);
+            cursor: pointer;
+        }
+        
+        .auth-toggle span {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            font-size: 11px;
+            opacity: 0.6;
+        }
+
+        /* --- HOME HEADER --- */
+        .header {
+            background-color: var(--primary);
+            padding: 25px 20px 45px 20px;
+            color: var(--white);
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(var(--primary-light) 15%, transparent 16%),
+                radial-gradient(var(--primary-light) 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            opacity: 0.3;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            object-fit: cover;
+            background: #fff;
+        }
+
+        .greeting h2 {
+            font-size: 14px;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .greeting h1 {
+            font-size: 18px;
+            font-weight: 600;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* HEADER ACTIONS CONTAINER (NEW) */
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            z-index: 2;
+        }
+
+        /* SHARED ACTION BTN STYLE */
+        .action-btn {
+            background: rgba(255,255,255,0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .action-btn:active { transform: scale(0.9); }
+        .action-btn i { color: #fff; font-size: 18px; }
+
+        /* OLD NOTIF BADGE (DOT) */
+        .notif-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: none;
+        }
+        .notif-badge.active { display: block; }
+
+        /* COUNTER BADGE (NEW FOR CART) */
+        .badge-count {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background-color: var(--accent);
+            color: var(--primary);
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary);
+            display: none;
+        }
+        .badge-count.active { display: flex; }
+
+        .search-wrapper {
+            padding: 0 20px;
+            margin-top: -25px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-bar {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 12px 15px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-bar i {
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        .search-bar input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .marquee-container {
+            margin: 15px 20px;
+            background: #FFF8E1;
+            border-left: 4px solid var(--accent);
+            padding: 8px 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .marquee-icon {
+            color: #FF5722;
+        }
+
+        .marquee-content {
+            white-space: nowrap;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .marquee-text {
+            display: inline-block;
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 500;
+            animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* --- ILMU HARIAN (DAILY KNOWLEDGE) --- */
+        .knowledge-card {
+            margin: 20px 20px 10px 20px;
+            background: linear-gradient(135deg, #E0F7FA 0%, #E1F5FE 100%);
+            border-radius: 15px;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .knowledge-card::after {
+            content: '\f0eb'; /* Lightbulb icon */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            right: -10px;
+            bottom: -20px;
+            font-size: 80px;
+            color: rgba(255,255,255,0.5);
+            transform: rotate(-20deg);
+        }
+
+        .knowledge-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #0277BD;
+        }
+
+        .knowledge-header i {
+            color: #FBC02D;
+        }
+
+        .knowledge-header span {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .knowledge-content h3 {
+            font-size: 14px;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .knowledge-content p {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- MENU GRID --- */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .menu-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 8px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .menu-item:active .menu-icon { transform: scale(0.95); }
+
+        .menu-icon.menu-1 { background-color: #E3F2FD; color: #1E88E5; }
+        .menu-icon.menu-2 { background-color: #E8F5E9; color: #43A047; }
+        .menu-icon.menu-3 { background-color: #FFF3E0; color: #E65100; }
+        .menu-icon.menu-4 { background-color: #F3E5F5; color: #8E24AA; }
+
+        .menu-label {
+            font-size: 11px;
+            color: var(--text-dark);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .section-title {
+            padding: 0 20px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title a {
+            font-size: 12px;
+            color: var(--text-gray);
+            text-decoration: none;
+        }
+
+        .market-list {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .market-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            height: 100px;
+            position: relative;
+        }
+
+        .market-img {
+            width: 100px;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .market-info {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .market-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .market-meta {
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rating {
+            color: #FFC107;
+            font-size: 10px;
+        }
+
+        .btn-visit {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            width: fit-content;
+            cursor: pointer;
+        }
+
+        /* --- ACCOUNT TAB --- */
+        .account-header-bg {
+            background-color: var(--primary);
+            height: 150px;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            position: relative;
+        }
+        
+        .account-profile-card {
+            margin: -80px 20px 20px 20px;
+            background: var(--white);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .profile-pic-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 4px solid var(--white);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            margin-top: -50px; /* Pull up */
+            background: #eee;
+            object-fit: cover;
+        }
+
+        .account-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .account-detail-info {
+            font-size: 11px;
+            color: var(--text-gray);
+            margin-top: 4px;
+        }
+
+        .account-badge {
+            background: #FFF8E1;
+            color: #FBC02D;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .account-stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        
+        .stat-item:active {
+            background: #f0f0f0;
+        }
+
+        .stat-val {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-gray);
+        }
+
+        .settings-list {
+            margin: 0 20px;
+            background: var(--white);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+        }
+
+        .setting-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+        }
+
+        .setting-item:last-child { border-bottom: none; }
+
+        .setting-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .setting-icon {
+            width: 35px;
+            height: 35px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .setting-text {
+            font-size: 13px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .logout-text { color: #D32F2F; }
+        .logout-icon { background: #FFEBEE; color: #D32F2F; }
+
+        /* --- SAVED ADDRESS VIEW STYLES --- */
+        #saved-address-view { background: #f4f7f6; padding-bottom: 90px; }
+        .address-list { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .address-card {
+            background: white; padding: 15px; border-radius: 15px; box-shadow: var(--shadow-card);
+            position: relative; border-left: 4px solid var(--primary);
+        }
+        .address-card h4 { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 5px; }
+        .address-card p { font-size: 12px; color: #666; line-height: 1.4; margin-bottom: 5px; }
+        .btn-delete-addr {
+            position: absolute; top: 10px; right: 10px; background: #FFEBEE; color: #D32F2F;
+            border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* FIX POSITION OF ADD ADDRESS BUTTON ON DESKTOP */
+        .btn-add-address {
+            position: fixed; 
+            bottom: 85px; 
+            width: 55px; height: 55px;
+            background: var(--primary); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+            box-shadow: 0 4px 15px rgba(93, 25, 25, 0.4); border: none; cursor: pointer; z-index: 95;
+            
+            /* Default for mobile (small screens) */
+            right: 20px;
+        }
+
+        /* On larger screens, center the button relative to the app container width */
+        @media (min-width: 481px) {
+            .btn-add-address {
+                right: auto;
+                left: 50%;
+                margin-left: 165px; 
+            }
+        }
+
+        /* --- SHOP VIEW --- */
+        #shop-view { background: #f4f7f6; padding-bottom: 90px; }
+        .page-header { background: var(--white); padding: 20px; position: sticky; top: 0; z-index: 10; box-shadow: var(--shadow-card); display: flex; align-items: center; gap: 15px; }
+        .back-btn { background: none; border: none; font-size: 20px; color: var(--text-dark); cursor: pointer; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .product-card { background: var(--white); border-radius: 12px; padding: 12px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 10px; }
+        .prod-img-box { height: 120px; background: #f9f9f9; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .prod-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        .prod-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        .prod-price { font-size: 14px; color: var(--primary); font-weight: 600; }
+        .btn-add-cart { background: var(--primary); color: var(--white); border: none; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 600; width: 100%; cursor: pointer; margin-top: auto; }
+        .btn-add-cart:active { transform: scale(0.95); }
+
+        /* --- MARKET DETAIL & REVIEW STYLES (NEW) --- */
+        #market-detail-view { background: #fff; padding-bottom: 90px; }
+        .market-hero {
+            height: 200px;
+            width: 100%;
+            background: #eee;
+            position: relative;
+        }
+        .market-hero img { width: 100%; height: 100%; object-fit: cover; }
+        .market-hero-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 20px;
+            color: white;
+        }
+        .market-hero h2 { font-size: 20px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .market-hero p { font-size: 12px; opacity: 0.9; margin-top: 5px; }
+
+        .rating-summary-box {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .rating-big {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1;
+        }
+        .rating-stars-big { color: var(--accent); font-size: 18px; margin-bottom: 5px; }
+        .rating-count { font-size: 12px; color: var(--text-gray); }
+
+        .review-input-box {
+            padding: 20px;
+            background: #FAFAFA;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .star-input {
+            display: flex; gap: 10px; margin-bottom: 10px;
+        }
+        .star-input i {
+            font-size: 24px; color: #ddd; cursor: pointer; transition: color 0.2s;
+        }
+        .star-input i.selected { color: var(--accent); }
+        
+        .review-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            margin-bottom: 10px;
+            resize: none;
+        }
+        .btn-submit-review {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .review-list { padding: 20px; }
+        .review-card {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .review-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .reviewer-name { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+        .review-date { font-size: 10px; color: var(--text-gray); }
+        .review-stars { color: var(--accent); font-size: 10px; margin-bottom: 5px; }
+        .review-text { font-size: 12px; color: #555; line-height: 1.4; }
+
+        /* --- ORDER VIEW --- */
+        #order-view { background: #f4f7f6; padding-bottom: 90px; }
+        .order-list { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .cart-item { background: white; padding: 15px; border-radius: 15px; display: flex; align-items: center; gap: 15px; box-shadow: var(--shadow-card); position: relative; }
+        .cart-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: #eee; }
+        .cart-info { flex: 1; }
+        .cart-title { font-weight: 700; font-size: 14px; color: var(--text-dark); }
+        .cart-price { font-size: 13px; color: var(--primary); font-weight: 600; margin-top: 2px; }
+        .cart-qty { font-size: 11px; color: var(--text-gray); margin-top: 2px; background: #f0f0f0; padding: 2px 8px; border-radius: 4px; display: inline-block; }
+        .btn-remove { background: #FFEBEE; color: #D32F2F; border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        
+        /* NEW STYLES FOR CART EDIT */
+        .cart-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-edit {
+            background: #E3F2FD;
+            color: #1976D2;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .order-summary { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 440px; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 90; display: flex; justify-content: space-between; align-items: center; }
+
+        /* --- CHECKOUT VIEW STYLES --- */
+        #checkout-view { background: #f4f7f6; padding-bottom: 90px; }
+        .checkout-container { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .checkout-card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .checkout-card-header {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkout-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            background: #f9f9f9;
+        }
+
+        .payment-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .payment-option {
+            flex: 1;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .payment-option.active {
+            border-color: var(--primary);
+            background: #FFF8E1;
+        }
+
+        .payment-option i { font-size: 20px; color: var(--text-gray); }
+        .payment-option.active i { color: var(--primary); }
+        .payment-option span { font-size: 11px; font-weight: 600; color: var(--text-dark); }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .summary-row.total {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 16px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .summary-row .price { color: var(--text-dark); }
+        .summary-row.total .price { color: var(--primary); }
+
+        /* SUCCESS MODAL ANIMATION */
+        .success-animation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .checkmark-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .checkmark-icon {
+            color: white;
+            font-size: 40px;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- ADMIN VIEW STYLES --- */
+        #admin-view {
+            padding-bottom: 90px;
+            background-color: var(--bg-body);
+        }
+
+        .admin-header {
+            background-color: var(--primary);
+            padding: 25px 20px 30px 20px;
+            color: var(--white);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        
+        .btn-back-admin {
+            background: rgba(255,255,255,0.2);
+            color: var(--white);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* ADMIN TABS */
+        .admin-tabs {
+            padding: 0 20px 15px 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .admin-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 25px;
+            background: #e0e0e0;
+            color: #666;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(93, 25, 25, 0.3);
+        }
+
+        .user-list {
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .user-card {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+            border-left: 4px solid var(--accent);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .user-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .user-card-name {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 15px;
+        }
+
+        .user-card-date {
+            font-size: 10px;
+            color: var(--text-gray);
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .user-card-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-dark);
+        }
+        
+        .user-card-row i {
+            color: var(--text-gray);
+            width: 15px;
+            text-align: center;
+        }
+        
+        /* ORDER ADMIN CARD (Used for History too with slight mods) */
+        .order-admin-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 15px;
+        }
+        
+        /* New Style for History Card specifically */
+        .history-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 15px;
+            border-left: 4px solid #eee;
+        }
+        
+        .history-card.completed { border-left-color: var(--success); }
+        .history-card.pending { border-left-color: var(--accent); }
+
+        .order-admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .order-admin-id { font-size: 12px; font-weight: 700; color: var(--text-gray); }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background: #FFF8E1; color: #FBC02D; }
+        .status-completed { background: #E8F5E9; color: #43A047; }
+
+        .order-admin-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .order-admin-items {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .order-admin-address {
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .order-admin-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .order-admin-total {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .order-admin-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action-admin {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* TOMBOL HAPUS USER (ADMIN) */
+        .btn-delete-user {
+            background: #FFEBEE;
+            color: #D32F2F;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 10px;
+            transition: background 0.2s;
+        }
+        
+        .btn-delete-user:active {
+            background: #FFCDD2;
+        }
+        
+        /* HISTORY VIEW STYLES */
+        #history-view { background: #f4f7f6; padding-bottom: 90px; }
+
+        /* EDIT PROFILE STYLES (NEW) */
+        #edit-profile-view { background: var(--white); padding-bottom: 90px; }
+        
+        .profile-edit-header {
+            background: var(--white);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: var(--shadow-card);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .edit-avatar-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 30px auto 20px auto;
+        }
+
+        .edit-avatar-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eee;
+        }
+
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            cursor: pointer;
+        }
+
+        .edit-form-group {
+            margin: 0 25px 20px 25px;
+        }
+
+        .edit-label {
+            font-size: 13px;
+            color: var(--text-gray);
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            background: #FAFAFA;
+            color: var(--text-dark);
+        }
+        
+        .edit-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+        }
+
+        .edit-input[readonly] {
+            background: #eee;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .btn-save-profile {
+            margin: 20px 25px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: calc(100% - 50px);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(93, 25, 25, 0.3);
+        }
+
+        /* --- CHAT VIEW STYLES (THEMED LAKU SOLO) --- */
+        #chat-view {
+            background: var(--chat-bg);
+            /* Subtle pattern for texture */
+            background-image: radial-gradient(#d1c4b7 1px, transparent 1px);
+            background-size: 20px 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 0; 
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            padding-bottom: 80px; /* Space for input bar */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Updated Message Bubble for WhatsApp-like layout */
+        .message-bubble {
+            max-width: 75%; /* Limit width like WA */
+            padding: 6px 10px 4px 10px; /* Tighter padding */
+            border-radius: 10px;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.3;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            word-wrap: break-word;
+            display: flex;
+            flex-direction: column;
+            min-width: 80px;
+        }
+
+        .message-bubble.me {
+            align-self: flex-end;
+            background-color: var(--chat-bubble-me);
+            color: var(--white);
+            border-top-right-radius: 0;
+        }
+
+        .message-bubble.other {
+            align-self: flex-start;
+            background-color: var(--chat-bubble-other);
+            color: var(--text-dark);
+            border-top-left-radius: 0;
+        }
+
+        .message-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 3px;
+            margin-top: 2px;
+            margin-right: -2px; /* Pull slightly to right edge */
+        }
+
+        .message-time {
+            font-size: 9px;
+            opacity: 0.7;
+            margin-bottom: 1px; /* Vertical align with icon */
+        }
+
+        .check-icon {
+            font-size: 11px;
+            display: flex;
+            align-items: flex-end;
+        }
+        
+        .check-read { color: var(--chat-tick-read); }
+        .check-sent { color: var(--chat-tick-sent); }
+
+        .chat-input-area {
+            position: fixed;
+            bottom: 0; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            background-color: #F0F0F0;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 102; 
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: none;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            background: #FFFFFF;
+        }
+
+        .btn-send {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* ADMIN CHAT LIST ITEM */
+        .chat-list-item {
+            background: var(--white);
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .chat-list-item:active { background: #f9f9f9; }
+        
+        .chat-list-avatar {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            background: #eee;
+            display: flex; align-items: center; justify-content: center;
+            color: #999; font-size: 20px;
+        }
+        
+        .chat-list-info { flex: 1; }
+        .chat-list-name { font-weight: 600; font-size: 14px; color: var(--text-dark); }
+        .chat-list-preview { font-size: 12px; color: var(--text-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+        .chat-list-meta { text-align: right; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+        .chat-list-time { font-size: 10px; color: #aaa; }
+        .chat-unread-badge { 
+            background: var(--error); color: white; 
+            font-size: 10px; font-weight: 700; 
+            width: 18px; height: 18px;
+            border-radius: 50%; 
+            display: flex; align-items:center; justify-content:center;
+        }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            /* FIX FOR DESKTOP POSITIONING */
+            left: 0; right: 0; margin: 0 auto;
+            
+            width: 100%;
+            max-width: 480px;
+            background: var(--white);
+            height: 70px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: 10px;
+            z-index: 100;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #A0A0A0;
+            text-decoration: none;
+            cursor: pointer;
+            padding-bottom: 5px;
+            transition: color 0.3s;
+            position: relative; /* For badge positioning */
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* RED BADGE FOR NAV ITEM */
+        .nav-badge {
+            position: absolute;
+            top: 2px;
+            right: 25%; 
+            background-color: var(--error);
+            color: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            display: none; /* Hidden by default */
+        }
+        .nav-badge.active { display: flex; }
+
+        .nav-fab-wrapper {
+            position: relative;
+            top: -25px;
+            width: 65px;
+            height: 65px;
+        }
+
+        .nav-fab {
+            width: 65px;
+            height: 65px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            box-shadow: 0 4px 10px rgba(93, 25, 25, 0.4);
+            border: 4px solid var(--white);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .nav-fab:active {
+            transform: scale(0.95);
+        }
+
+        .nav-fab i {
+            font-size: 24px;
+            margin-bottom: 0;
+        }
+
+        .nav-fab span {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--white);
+            margin-top: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- TOAST CONTAINER -->
+        <div id="toast-container"></div>
+
+        <!-- MODAL CONFIRMATION OVERLAY -->
+        <div id="confirm-modal" class="modal-overlay">
+            <div class="modal-box">
+                <div class="modal-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="modal-title" id="modal-title">Konfirmasi</h3>
+                <p class="modal-text" id="modal-msg">Apakah Anda yakin?</p>
+                <div class="modal-actions">
+                    <button class="modal-btn btn-cancel" onclick="closeConfirm()">Batal</button>
+                    <button class="modal-btn btn-confirm" id="btn-modal-confirm">Ya, Lanjutkan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUCCESS MODAL (NEW) -->
+        <div id="success-modal" class="modal-overlay">
+            <div class="modal-box">
+                <div class="success-animation">
+                    <div class="checkmark-circle">
+                        <i class="fa-solid fa-check checkmark-icon"></i>
+                    </div>
+                </div>
+                <h3 class="modal-title" style="color:var(--success)">Pesanan Berhasil!</h3>
+                <p class="modal-text">Terima kasih. Pesanan Anda akan segera diproses oleh pedagang pasar.</p>
+                <button class="modal-btn" style="background:var(--success); color:white; width:100%;" onclick="closeCheckoutSuccess()">Kembali ke Beranda</button>
+            </div>
+        </div>
+
+        <!-- PRODUCT WEIGHT MODAL (BOTTOM SHEET) -->
+        <div id="product-modal-overlay" class="sheet-overlay" onclick="closeProductModal()"></div>
+        <div id="product-modal" class="bottom-sheet">
+            <div class="sheet-header">
+                <img src="" id="modal-prod-img" class="sheet-img">
+                <div class="sheet-info">
+                    <h3 id="modal-prod-name">Nama Produk</h3>
+                    <p id="modal-prod-price">Rp 0 / kg</p>
+                </div>
+            </div>
+
+            <div class="qty-control-wrapper">
+                <div style="font-size:12px; margin-bottom:8px; color:#666;" id="modal-action-label">Pilih Berat:</div>
+                
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="setPresetWeight(250)">250 gr</button>
+                    <button class="preset-btn" onclick="setPresetWeight(500)">500 gr</button>
+                    <button class="preset-btn active" onclick="setPresetWeight(1000)">1 kg</button>
+                    <button class="preset-btn" onclick="setPresetWeight(2000)">2 kg</button>
+                </div>
+
+                <div class="qty-adjuster">
+                    <button class="qty-btn" onclick="adjustWeight(-100)"><i class="fa-solid fa-minus"></i></button>
+                    <div class="qty-input-container">
+                        <input type="number" id="weight-input" class="qty-input" value="1" oninput="calculateFromInput()">
+                        <span id="unit-label" class="unit-label" onclick="toggleUnit()">kg</span>
+                    </div>
+                    <button class="qty-btn" onclick="adjustWeight(100)"><i class="fa-solid fa-plus"></i></button>
+                </div>
+            </div>
+
+            <div class="total-preview">
+                <div class="total-label">Total Harga</div>
+                <div class="total-value" id="modal-total-price">Rp 0</div>
+            </div>
+
+            <button class="btn-sheet-submit" id="btn-modal-submit" onclick="submitToCart()">
+                <i class="fa-solid fa-cart-plus"></i> Masukkan Keranjang
+            </button>
+        </div>
+
+        <!-- ADD ADDRESS MODAL (NEW) -->
+        <div id="address-modal-overlay" class="sheet-overlay" onclick="closeAddressModal()"></div>
+        <div id="address-modal" class="bottom-sheet">
+            <h3 style="font-size:16px; margin-bottom:15px; font-weight:700;">Tambah Alamat Baru</h3>
+            <input type="text" id="new-addr-label" class="login-input" placeholder="Label (Rumah, Kantor, dll)" style="background:#f5f5f5;">
+            <input type="text" id="new-addr-recipient" class="login-input" placeholder="Nama Penerima" style="background:#f5f5f5;">
+            <input type="tel" id="new-addr-phone" class="login-input" placeholder="Nomor HP" style="background:#f5f5f5;">
+            <textarea id="new-addr-full" class="login-input" rows="3" placeholder="Alamat Lengkap (Jalan, RT/RW, Kelurahan)" style="background:#f5f5f5;"></textarea>
+            <button class="btn-sheet-submit" onclick="saveAddress()">Simpan Alamat</button>
+        </div>
+        
+        <!-- --- LOGIN / REGISTER VIEW --- -->
+        <div id="login-view" class="view-section">
+            <div class="login-content-wrapper">
+                <div class="login-logo">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <h1 class="login-title">Laku Solo</h1>
+                <p class="login-subtitle">Aplikasi Warga & Pasar Solo</p>
+                
+                <div class="login-form">
+                    <div class="form-header" id="auth-title">Masuk Aplikasi</div>
+                    
+                    <!-- INPUTS (Some hidden by default based on mode) -->
+                    <input type="text" id="loginName" class="login-input hidden" placeholder="Nama Lengkap">
+                    <input type="email" id="loginEmail" class="login-input" placeholder="Alamat Email">
+                    <input type="tel" id="loginPhone" class="login-input hidden" placeholder="Nomor WhatsApp">
+                    <input type="password" id="loginPass" class="login-input" placeholder="Kata Sandi">
+                    
+                    <button class="login-btn" id="btn-auth-action" onclick="handleAuthAction()">MASUK</button>
+
+                    <div class="auth-toggle" onclick="toggleAuthMode()">
+                        <span id="auth-toggle-text">Belum punya akun? Daftar disini</span>
+                    </div>
+                </div>
+                
+                <div class="login-footer">
+                    &copy; 2026 Laku Solo. Pemerintah Kota Surakarta.
+                </div>
+            </div>
+        </div>
+
+        <!-- --- MAIN APP VIEW (Active if logged in) --- -->
+        <div id="app-view" class="view-section">
+            
+            <!-- HOME TAB CONTENT -->
+            <div id="tab-home" class="tab-content active">
+                <header class="header">
+                    <div class="user-info">
+                        <img src="https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/219/2025/02/03/Di-era-digital-saat-ini-banyak-orang-menggunakan-foto-profil-WhatsApp-untuk-menunjukkan-identitas-ekspresi-diri-atau-sekadar-memberikan-kesan-tertentu-kepada-kontak-mereka-Namun-ada-juga-seba-3803796639.png" alt="Foto Profil Pengguna" class="avatar" id="headerAvatar">
+                        <div class="greeting">
+                            <h2>Sugeng Rawuh,</h2>
+                            <h1 id="headerUserName">...</h1>
+                        </div>
+                    </div>
+                    <!-- Header Actions Container (Cart Only) -->
+                    <div class="header-actions">
+                        <div class="action-btn" onclick="openOrders()">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <div class="badge-count" id="header-cart-badge">0</div>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="search-wrapper">
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Cari beras, cabai, atau pasar...">
+                    </div>
+                </div>
+
+                <div class="marquee-container">
+                    <i class="fa-solid fa-fire marquee-icon"></i>
+                    <div class="marquee-content">
+                        <div class="marquee-text">
+                            🔥 Info Harga Pasar: Cabai Rawit Rp45.000/kg  •  Beras C4 Rp14.500/kg  •  Telur Ayam Rp28.000/kg  •  Bawang Merah Rp32.000/kg  •  Daging Sapi Rp120.000/kg
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ILMU HARIAN SECTION -->
+                <div class="knowledge-card" onclick="refreshFact()">
+                    <div class="knowledge-header">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>Ilmu Harian</span>
+                    </div>
+                    <div class="knowledge-content">
+                        <h3 id="fact-title">Memuat...</h3>
+                        <p id="fact-text">...</p>
+                    </div>
+                </div>
+
+                <div class="menu-grid">
+                    <div class="menu-item" onclick="showToast('Menu Pasar & Solo: Jelajahi pasar tradisional.')">
+                        <div class="menu-icon menu-1"><i class="fa-solid fa-shop"></i></div>
+                        <span class="menu-label">Pasar & Solo</span>
+                    </div>
+                    <div class="menu-item" onclick="openShop()">
+                        <div class="menu-icon menu-2"><i class="fa-solid fa-basket-shopping"></i></div>
+                        <span class="menu-label">Tukon Sembako</span>
+                    </div>
+                    <!-- Added Kuliner Solo -->
+                    <div class="menu-item" onclick="showToast('Kuliner Solo: Temukan jajanan legendaris!')">
+                        <div class="menu-icon menu-3" style="background-color: #FFF3E0; color: #E65100;"><i class="fa-solid fa-bowl-food"></i></div>
+                        <span class="menu-label">Kuliner Solo</span>
+                    </div>
+                    <div class="menu-item" onclick="showToast('Menu Titip Tandur: Dukung petani lokal.')">
+                        <div class="menu-icon menu-4"><i class="fa-solid fa-seedling"></i></div>
+                        <span class="menu-label">Titip Tandur</span>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <span>Pasar Terdekat</span>
+                    <a href="#" onclick="showToast('Menampilkan semua pasar...')">Lihat Semua</a>
+                </div>
+
+                <!-- DYNAMIC MARKET LIST CONTAINER -->
+                <div id="market-list-dynamic" class="market-list">
+                    <div style="text-align:center; padding:20px; color:#888;">
+                        <i class="fa-solid fa-location-dot fa-spin"></i> Mencari lokasi Anda...
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCOUNT TAB CONTENT -->
+            <div id="tab-account" class="tab-content" style="display:none;">
+                <div class="account-header-bg"></div>
+                <div class="account-profile-card">
+                    <img src="https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/219/2025/02/03/Di-era-digital-saat-ini-banyak-orang-menggunakan-foto-profil-WhatsApp-untuk-menunjukkan-identitas-ekspresi-diri-atau-sekadar-memberikan-kesan-tertentu-kepada-kontak-mereka-Namun-ada-juga-seba-3803796639.png" class="profile-pic-large" id="accountAvatar" alt="Foto Profil Akun">
+                    <h2 class="account-name" id="accountUserName">...</h2>
+                    <div class="account-detail-info" id="accountUserEmail">...</div>
+                    <div class="account-detail-info" id="accountUserPhone">...</div>
+                    <span class="account-badge" id="accountBadge">Warga Solo Setia</span>
+                    
+                    <div class="account-stats">
+                        <div class="stat-item" onclick="openHistory()">
+                            <span class="stat-val" style="color: var(--primary);"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                            <span class="stat-label">Riwayat</span>
+                        </div>
+                        <div class="stat-item" onclick="showToast('Daftar Favorit belum ada item')">
+                            <span class="stat-val" style="color: #D32F2F;"><i class="fa-solid fa-heart"></i></span>
+                            <span class="stat-label">Favorit</span>
+                        </div>
+                        <div class="stat-item" onclick="showToast('Belum ada Pasar Tradisional favorit')">
+                            <span class="stat-val" style="color: #E65100;"><i class="fa-solid fa-shop"></i></span>
+                            <span class="stat-label">Pasar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-list">
+                    <!-- Admin Panel Button (Hidden by default) -->
+                    <div class="setting-item" id="btn-admin-panel" onclick="openAdminPanel()" style="display: none; background-color: #FFF3E0;">
+                        <div class="setting-left">
+                            <div class="setting-icon" style="background: #FFE0B2; color: #E65100;"><i class="fa-solid fa-user-shield"></i></div>
+                            <span class="setting-text" style="color: #E65100; font-weight: 700;">Panel Admin</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:#E65100; font-size:12px;"></i>
+                    </div>
+
+                    <div class="setting-item" onclick="openEditProfile()">
+                        <div class="setting-left">
+                            <div class="setting-icon"><i class="fa-solid fa-user-pen"></i></div>
+                            <span class="setting-text">Edit Profil</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:#ddd; font-size:12px;"></i>
+                    </div>
+                    
+                    <!-- NEW SAVED ADDRESS MENU -->
+                    <div class="setting-item" onclick="openSavedAddresses()">
+                        <div class="setting-left">
+                            <div class="setting-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                            <span class="setting-text">Alamat Tersimpan</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:#ddd; font-size:12px;"></i>
+                    </div>
+
+                    <div class="setting-item" onclick="handleSwitchAccount()">
+                        <div class="setting-left">
+                            <div class="setting-icon"><i class="fa-solid fa-users-gear"></i></div>
+                            <span class="setting-text">Ganti Akun</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right" style="color:#ddd; font-size:12px;"></i>
+                    </div>
+                    <div class="setting-item" onclick="handleLogout()">
+                        <div class="setting-left">
+                            <div class="setting-icon logout-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+                            <span class="setting-text logout-text">Keluar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHOP VIEW (Tukon Sembako) -->
+            <div id="shop-view" class="view-section" style="display:none;">
+                <div class="page-header">
+                    <button class="back-btn" onclick="switchTab('home')"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="flex:1;">
+                        <h2 style="font-size:18px; font-weight:700;">Tukon Sembako</h2>
+                        <p style="font-size:11px; color:#666;">Pasar Legi Official</p>
+                    </div>
+                    <div style="background:#eee; padding:8px; border-radius:50%; position:relative;" onclick="openOrders()">
+                        <i class="fa-solid fa-cart-shopping" style="color:var(--primary)"></i>
+                        <div id="shop-cart-badge" style="position:absolute; top:-5px; right:-5px; background:var(--accent); color:var(--text-dark); width:16px; height:16px; border-radius:50%; font-size:10px; display:flex; align-items:center; justify-content:center; font-weight:700; display:none;">0</div>
+                    </div>
+                </div>
+                <div class="product-grid" id="product-list-container"></div>
+            </div>
+
+            <!-- MARKET DETAIL VIEW (NEW) -->
+            <div id="market-detail-view" class="view-section" style="display:none;">
+                <div class="page-header" style="background:transparent; position:absolute; width:100%; padding:20px; z-index:20;">
+                    <button class="back-btn" onclick="switchTab('home')" style="background:rgba(255,255,255,0.8); width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2);"><i class="fa-solid fa-arrow-left"></i></button>
+                </div>
+                
+                <div class="market-hero">
+                    <img src="" id="detail-market-img" alt="Pasar">
+                    <div class="market-hero-overlay">
+                        <h2 id="detail-market-name-header">Pasar...</h2>
+                        <p><i class="fa-solid fa-location-dot"></i> <span id="detail-market-dist">... km</span></p>
+                    </div>
+                </div>
+
+                <div class="rating-summary-box">
+                    <div style="text-align:center;">
+                        <div class="rating-big" id="detail-rating-avg">0.0</div>
+                        <div class="rating-stars-big" id="detail-rating-stars"></div>
+                        <div class="rating-count"><span id="detail-rating-count">0</span> ulasan</div>
+                    </div>
+                    <div style="flex:1;">
+                        <h3 style="font-size:16px; font-weight:700; margin-bottom:5px;" id="detail-market-name">Pasar</h3>
+                        <p style="font-size:12px; color:#666; line-height:1.4;">Pusat perbelanjaan tradisional lengkap dengan berbagai kebutuhan pokok segar dari petani lokal.</p>
+                    </div>
+                </div>
+
+                <div class="review-input-box">
+                    <h4 style="font-size:14px; margin-bottom:10px;">Berikan Ulasan Anda</h4>
+                    <div class="star-input">
+                        <i class="fa-solid fa-star" id="star-1" onclick="selectStar(1)"></i>
+                        <i class="fa-solid fa-star" id="star-2" onclick="selectStar(2)"></i>
+                        <i class="fa-solid fa-star" id="star-3" onclick="selectStar(3)"></i>
+                        <i class="fa-solid fa-star" id="star-4" onclick="selectStar(4)"></i>
+                        <i class="fa-solid fa-star" id="star-5" onclick="selectStar(5)"></i>
+                        <input type="hidden" id="selected-rating" value="0">
+                    </div>
+                    <textarea class="review-textarea" id="review-comment" rows="3" placeholder="Ceritakan pengalaman belanja Anda di sini..."></textarea>
+                    <button class="btn-submit-review" onclick="submitReview()">Kirim Ulasan</button>
+                </div>
+
+                <div class="review-list">
+                    <h4 style="font-size:14px; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Ulasan Pengunjung</h4>
+                    <div id="review-list-container">
+                        <!-- Reviews inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ORDER VIEW (Pesanan Saya) -->
+            <div id="order-view" class="view-section" style="display:none;">
+                <div class="page-header">
+                    <button class="back-btn" onclick="switchTab('home')"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="flex:1;">
+                        <h2 style="font-size:18px; font-weight:700;">Pesanan Saya</h2>
+                        <p style="font-size:11px; color:#666;">Daftar belanjaan saat ini</p>
+                    </div>
+                </div>
+                <div class="order-list" id="order-list-container">
+                    <!-- Items will be injected here -->
+                </div>
+                <div class="order-summary" id="order-summary-box" style="display:none;">
+                    <div>
+                        <div style="font-size:11px; color:#888;">Estimasi Total</div>
+                        <div style="font-size:16px; font-weight:700; color:var(--primary);" id="order-total-price">Rp 0</div>
+                    </div>
+                    <button class="btn-visit" onclick="openCheckout()">Checkout <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- CHECKOUT VIEW (New Feature) -->
+            <div id="checkout-view" class="view-section" style="display:none;">
+                <div class="page-header">
+                    <button class="back-btn" onclick="openOrders()"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="flex:1;">
+                        <h2 style="font-size:18px; font-weight:700;">Pengiriman</h2>
+                        <p style="font-size:11px; color:#666;">Lengkapi data pengiriman</p>
+                    </div>
+                </div>
+
+                <div class="checkout-container">
+                    <!-- Address Section -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-header"><i class="fa-solid fa-location-dot" style="color:var(--primary)"></i> Alamat Pengiriman</div>
+                        <textarea id="checkout-address" class="checkout-input" rows="3" placeholder="Contoh: Jl. Slamet Riyadi No. 12, RT 02/RW 05, Kauman, Solo (Depan Toko Batik...)"></textarea>
+                        <input type="text" id="checkout-note" class="checkout-input" placeholder="Catatan (Opsional, misal: Pagar hitam)" style="margin-top:10px;">
+                    </div>
+
+                    <!-- Payment Method Section -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-header"><i class="fa-solid fa-wallet" style="color:var(--primary)"></i> Metode Pembayaran</div>
+                        <div class="payment-options">
+                            <div class="payment-option active" id="pay-cod" onclick="selectPaymentMethod('COD')">
+                                <i class="fa-solid fa-money-bill-wave"></i>
+                                <span>COD (Tunai)</span>
+                            </div>
+                            <div class="payment-option" id="pay-qris" onclick="selectPaymentMethod('QRIS')">
+                                <i class="fa-solid fa-qrcode"></i>
+                                <span>QRIS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Section -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-header">Ringkasan Pembayaran</div>
+                        <div class="summary-row">
+                            <span>Total Harga Barang</span>
+                            <span class="price" id="checkout-subtotal">Rp 0</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Ongkos Kirim</span>
+                            <span class="price" id="checkout-shipping">Rp 7.000</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total Pembayaran</span>
+                            <span class="price" id="checkout-total">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-summary" style="display:flex;">
+                    <div>
+                        <div style="font-size:11px; color:#888;">Total Tagihan</div>
+                        <div style="font-size:16px; font-weight:700; color:var(--primary);" id="checkout-bar-total">Rp 0</div>
+                    </div>
+                    <button class="btn-visit" onclick="placeOrder()">Buat Pesanan <i class="fa-solid fa-clipboard-check"></i></button>
+                </div>
+            </div>
+
+            <!-- CHAT VIEW (THEMED) -->
+            <div id="chat-view" class="view-section" style="display:none; z-index:200;">
+                <div class="page-header" style="background:var(--primary); color:white; border-radius:0;">
+                    <button class="back-btn" onclick="switchTab('home')" style="color:white;"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="flex:1; display:flex; align-items:center; gap:10px;">
+                        <div style="width:35px; height:35px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--primary);">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <div>
+                            <h2 style="font-size:16px; font-weight:700;" id="chat-header-name">Admin Laku Solo</h2>
+                            <p style="font-size:11px; opacity:0.9;" id="chat-header-status">Online</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="chat-messages-container" class="chat-container">
+                    <!-- Messages will be injected here -->
+                    <div style="text-align:center; margin-top:20px; color:#888; font-size:12px; background:rgba(255,255,255,0.6); padding:10px; border-radius:10px; align-self:center;">
+                        Mulai percakapan dengan Admin. <br> Pesan Anda aman dan terenkripsi.
+                    </div>
+                </div>
+
+                <div class="chat-input-area" id="chat-input-wrapper">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Ketik pesan..." onkeypress="if(event.key === 'Enter') sendChat()">
+                    <button class="btn-send" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <!-- ADMIN DASHBOARD VIEW (New) -->
+            <div id="admin-view" class="view-section" style="display: none;">
+                <div class="admin-header">
+                    <h2>Panel Admin</h2>
+                    <button class="btn-back-admin" onclick="closeAdminPanel()">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                    </button>
+                </div>
+                
+                <div class="admin-tabs">
+                    <button class="admin-tab active" id="tab-btn-users" onclick="switchAdminTab('users')">Warga</button>
+                    <button class="admin-tab" id="tab-btn-orders" onclick="switchAdminTab('orders')">Pesanan</button>
+                    <button class="admin-tab" id="tab-btn-chats" onclick="switchAdminTab('chats')">Chat Masuk</button>
+                </div>
+
+                <!-- USER LIST CONTAINER -->
+                <div id="admin-users-container" style="display: block;">
+                    <div id="admin-user-list" class="user-list">
+                        <div style="text-align:center; padding:20px; color:#888;">Memuat data warga...</div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #888;">
+                        Total Warga Terdaftar: <span id="total-users-count">...</span>
+                    </div>
+                </div>
+
+                <!-- ORDER LIST CONTAINER -->
+                <div id="admin-orders-container" style="display: none;">
+                    <div id="admin-order-list" class="user-list">
+                         <div style="text-align:center; padding:20px; color:#888;">Memuat data pesanan...</div>
+                    </div>
+                </div>
+
+                <!-- CHAT LIST CONTAINER (ADMIN) -->
+                <div id="admin-chats-container" style="display: none;">
+                    <div id="admin-chat-list" class="user-list">
+                        <div style="text-align:center; padding:20px; color:#888;">Memuat percakapan...</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- HISTORY VIEW (NEW) -->
+            <div id="history-view" class="view-section" style="display: none;">
+                <div class="page-header">
+                    <button class="back-btn" onclick="switchTab('account')"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="flex:1;">
+                        <h2 style="font-size:18px; font-weight:700;">Riwayat Belanja</h2>
+                        <p style="font-size:11px; color:#666;">Daftar transaksi Anda</p>
+                    </div>
+                </div>
+                <div id="history-list-container" class="order-list">
+                    <div style="text-align:center; padding:20px; color:#888;">Memuat riwayat...</div>
+                </div>
+            </div>
+
+            <!-- EDIT PROFILE VIEW (NEW) -->
+            <div id="edit-profile-view" class="view-section" style="display: none;">
+                <div class="profile-edit-header">
+                    <button class="back-btn" onclick="switchTab('account')"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h2 style="font-size:18px; font-weight:700;">Edit Profil</h2>
+                </div>
+
+                <div class="edit-avatar-wrapper">
+                    <img src="" id="edit-avatar-img" class="edit-avatar-img">
+                    <div class="edit-avatar-btn" onclick="document.getElementById('edit-avatar-url').focus()">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+
+                <div class="edit-form-group">
+                    <label class="edit-label">Link Foto Profil (URL)</label>
+                    <input type="text" id="edit-avatar-url" class="edit-input" placeholder="Tempel link gambar disini..." oninput="updateAvatarPreview(this.value)">
+                </div>
+
+                <div class="edit-form-group">
+                    <label class="edit-label">Nama Lengkap</label>
+                    <input type="text" id="edit-name" class="edit-input" placeholder="Nama Anda">
+                </div>
+
+                <div class="edit-form-group">
+                    <label class="edit-label">Nomor WhatsApp</label>
+                    <input type="tel" id="edit-phone" class="edit-input" placeholder="08xxxxxxxxxx">
+                </div>
+
+                <div class="edit-form-group">
+                    <label class="edit-label">Email (Tidak dapat diubah)</label>
+                    <input type="email" id="edit-email" class="edit-input" readonly>
+                </div>
+
+                <button class="btn-save-profile" onclick="saveProfileChanges()">Simpan Perubahan</button>
+            </div>
+
+            <!-- NEW SAVED ADDRESS VIEW -->
+            <div id="saved-address-view" class="view-section" style="display: none;">
+                <div class="page-header">
+                    <button class="back-btn" onclick="switchTab('account')"><i class="fa-solid fa-arrow-left"></i></button>
+                    <div style="flex:1;">
+                        <h2 style="font-size:18px; font-weight:700;">Alamat Tersimpan</h2>
+                        <p style="font-size:11px; color:#666;">Kelola alamat pengiriman Anda</p>
+                    </div>
+                </div>
+                <div id="address-list-container" class="address-list"></div>
+                <button class="btn-add-address" onclick="openAddressModal()"><i class="fa-solid fa-plus"></i></button>
+            </div>
+
+            <!-- BOTTOM NAVIGATION -->
+            <nav class="bottom-nav">
+                <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Beranda</span>
+                </div>
+                <div class="nav-item" id="nav-orders" onclick="openOrders()">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span>Pesanan</span>
+                </div>
+                
+                <div class="nav-fab-wrapper">
+                    <div class="nav-fab" onclick="showToast('Membuka Kamera Kode QR...')">
+                        <i class="fa-solid fa-qrcode"></i>
+                        <span>BAYAR</span>
+                    </div>
+                </div>
+
+                <!-- CHANGED: NOTIFICATION TO CHAT -->
+                <div class="nav-item" id="nav-chat" onclick="openChat()">
+                    <div class="nav-badge" id="nav-chat-badge">0</div>
+                    <i class="fa-regular fa-comments"></i>
+                    <span>Chat</span>
+                </div>
+                
+                <div class="nav-item" id="nav-account" onclick="switchTab('account')">
+                    <i class="fa-regular fa-user"></i>
+                    <span>Akun</span>
+                </div>
+            </nav>
+
+        </div>
+
+    </div>
+
+    <!-- TYPE="MODULE" IS REQUIRED FOR FIREBASE IMPORTS -->
+    <script type="module">
+        // --- FIREBASE IMPORTS ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        // Added onValue and off for realtime listening
+        import { getDatabase, ref, set, get, child, update, remove, push, onValue, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- KONFIGURASI FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCr4y-fjuE_1YPqTkknEKJwbqJ7mZC0-NM",
+            authDomain: "lakusoloapp.firebaseapp.com",
+            databaseURL: "https://lakusoloapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "lakusoloapp",
+            storageBucket: "lakusoloapp.firebasestorage.app",
+            messagingSenderId: "256864210854",
+            appId: "1:256864210854:web:1426fce30d696d7dda8967",
+            measurementId: "G-7TTMDG193L"
+        };
+        // -----------------------------
+
+        // --- INIT FIREBASE ---
+        let app, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+            console.log("Firebase initialized");
+        } catch (e) {
+            console.error("Firebase init failed. Did you paste the config?", e);
+            // Fallback for UI if config is missing
+        }
+
+        // --- DATA STORE (LOCAL SESSION) ---
+        const SESSION_KEY = 'lakuSolo_currentUser'; 
+
+        // --- ILMU HARIAN DATA ---
+        const facts = [
+            { title: "Filosofi Batik", text: "Batik Parang dulunya hanya boleh dikenakan oleh raja dan keturunannya di Keraton Solo." },
+            { title: "Kuliner Legendaris", text: "Serabi Notosuman sudah ada sejak tahun 1923, menjadi salah satu ikon kuliner tertua di Solo." },
+            { title: "Sejarah Pasar", text: "Pasar Gede Hardjonagoro dirancang oleh arsitek Thomas Karsten pada tahun 1930 dengan memadukan gaya Jawa dan kolonial." },
+            { title: "Kuliner Solo", text: "Nasi Liwet aslinya berasal dari Desa Menuran, Sukoharjo, yang kemudian menjadi ikon kuliner Solo." },
+            { title: "Eco-Enzyme", text: "Kulit buah jangan dibuang! Fermentasi menjadi Eco-Enzyme serbaguna untuk pembersih alami." }
+        ];
+
+        // --- MARKET DATA (WITH REAL COORDINATES) ---
+        const marketsData = [
+            { 
+                id: 'gede', 
+                name: 'Pasar Gede Hardjonagoro', 
+                lat: -7.5703, 
+                lng: 110.8356, 
+                img: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80', 
+                rating: 4.8 // Default backup
+            },
+            { 
+                id: 'kadipolo', 
+                name: 'Pasar Kadipolo', 
+                lat: -7.5682, 
+                lng: 110.8125, 
+                img: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80', 
+                rating: 4.5 
+            },
+            { 
+                id: 'legi', 
+                name: 'Pasar Legi', 
+                lat: -7.5583, 
+                lng: 110.8252, 
+                img: 'https://images.unsplash.com/photo-1516594798947-e65505dbd29d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80', 
+                rating: 4.7 
+            },
+            { 
+                id: 'nusukan', 
+                name: 'Pasar Nusukan', 
+                lat: -7.5498, 
+                lng: 110.8227, 
+                img: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80', 
+                rating: 4.6 
+            },
+            { 
+                id: 'jongke', 
+                name: 'Pasar Jongke', 
+                lat: -7.5661, 
+                lng: 110.7958, 
+                img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80', 
+                rating: 4.4 
+            }
+        ];
+
+        // --- SHOP & CART DATA ---
+        // Price assumed per KG unless specified
+        const products = [
+            { id: 1, name: "Beras C4 Raja", price: 14500, unit: "per kg", img: "https://images.tokopedia.net/img/cache/700/VqbcmM/2021/3/4/0d473456-6218-4940-a35c-4395df938a8e.jpg" },
+            { id: 2, name: "Minyak Goreng", price: 16000, unit: "per liter", img: "https://assets.klikindomaret.com/products/20035252/20035252_1.jpg" },
+            { id: 3, name: "Telur Ayam Negeri", price: 28000, unit: "per kg", img: "https://asset.kompas.com/crops/C4_1Y_I5GkM60f_I-rJqF70m_Xk=/0x0:1000x667/750x500/data/photo/2020/04/09/5e8ed50d998f4.jpg" },
+            { id: 4, name: "Gula Pasir", price: 13500, unit: "per kg", img: "https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//96/MTA-8622830/gulaku_gulaku_kuning_1_kg_full02_i0o6k2w.jpg" },
+            { id: 5, name: "Bawang Merah", price: 32000, unit: "per kg", img: "https://awsimages.detik.net.id/community/media/visual/2023/04/13/bawang-merah-1_169.jpeg?w=700&q=90" },
+            { id: 6, name: "Cabai Rawit Merah", price: 45000, unit: "per kg", img: "https://res.cloudinary.com/dk0z4ums3/image/upload/v1614749669/attached_image/manfaat-cabai-rawit-untuk-kesehatan-dan-cara-aman-mengonsumsinya.jpg" }
+        ];
+        
+        let cart = [];
+        // Temporary state for the modal
+        let currentModalProduct = null;
+        let currentWeight = 1000; // in grams
+        let currentUnit = 'kg'; // 'kg' or 'gr'
+        let editingCartItemId = null; // Track if we are editing an existing item
+
+        // Checkout State
+        let selectedPaymentMethod = 'COD';
+        const shippingCost = 7000;
+
+        // Chat State
+        let activeChatListener = null;
+        let unreadListener = null;
+        let currentChatUserKey = null; // Used for Admin to know who they are chatting with
+
+        // --- AUTH STATE ---
+        let isLoginMode = true;
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLogin();
+            loadRandomFact();
+            renderProducts();
+            initLocationAndMarkets(); // START GEO LOCATION
+        });
+        
+        // --- LOCATION LOGIC ---
+        function initLocationAndMarkets() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        renderMarkets(userLat, userLng);
+                    },
+                    (error) => {
+                        console.error("Geolocation denied or error:", error);
+                        renderMarkets(null, null); // Render default without sorting
+                    }
+                );
+            } else {
+                renderMarkets(null, null);
+            }
+        }
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Radius of the earth in km
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const d = R * c; // Distance in km
+            return d;
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI / 180);
+        }
+
+        // --- EXPOSE FUNCTIONS TO WINDOW (Karena type="module") ---
+        window.handleAuthAction = handleAuthAction;
+        window.toggleAuthMode = toggleAuthMode;
+        window.handleLogout = handleLogout;
+        window.handleSwitchAccount = handleSwitchAccount;
+        window.openAdminPanel = openAdminPanel;
+        window.closeAdminPanel = closeAdminPanel;
+        window.deleteUser = deleteUser;
+        window.switchTab = switchTab;
+        window.showToast = showToast;
+        window.closeConfirm = closeConfirm;
+        window.refreshFact = refreshFact;
+        window.openShop = openShop;
+        window.openOrders = openOrders;
+        // Modified functions for cart logic
+        window.openProductModal = openProductModal;
+        window.closeProductModal = closeProductModal;
+        window.adjustWeight = adjustWeight;
+        window.setPresetWeight = setPresetWeight;
+        window.submitToCart = submitToCart;
+        window.removeFromCart = removeFromCart;
+        window.toggleUnit = toggleUnit;
+        window.calculateFromInput = calculateFromInput;
+        // Checkout functions
+        window.openCheckout = openCheckout;
+        window.selectPaymentMethod = selectPaymentMethod;
+        window.placeOrder = placeOrder;
+        window.closeCheckoutSuccess = closeCheckoutSuccess;
+        // Admin New Functions
+        window.switchAdminTab = switchAdminTab;
+        window.updateOrderStatus = updateOrderStatus;
+        window.deleteOrder = deleteOrder;
+        window.openAdminChatWithUser = openAdminChatWithUser;
+        // History Function
+        window.openHistory = openHistory;
+        // Chat Functions
+        window.openChat = openChat;
+        window.sendChat = sendChat;
+        // Edit Profile Functions (NEW)
+        window.openEditProfile = openEditProfile;
+        window.saveProfileChanges = saveProfileChanges;
+        window.updateAvatarPreview = updateAvatarPreview;
+        // Saved Address functions
+        window.openSavedAddresses = openSavedAddresses; 
+        window.openAddressModal = openAddressModal; 
+        window.closeAddressModal = closeAddressModal;
+        window.saveAddress = saveAddress; 
+        window.deleteAddress = deleteAddress;
+        // Market Review Functions
+        window.openMarketDetail = openMarketDetail;
+        window.selectStar = selectStar;
+        window.submitReview = submitReview;
+
+        // --- HELPER: SANITIZE EMAIL FOR FIREBASE KEY ---
+        // Firebase paths cannot contain '.', '#', '$', '[', or ']'
+        function sanitizeEmail(email) {
+            return email.replace(/\./g, ',');
+        }
+
+        // --- HELPER: CURRENCY FORMATTER ---
+        function formatCurrency(amount) {
+            return "Rp " + Math.ceil(amount).toLocaleString('id-ID');
+        }
+
+        // --- AUTH LOGIC (MODIFIED FOR FIREBASE) ---
+        function checkLogin() {
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (userJSON) {
+                const user = JSON.parse(userJSON);
+                showApp(user);
+            } else {
+                showLogin();
+            }
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            
+            const title = document.getElementById('auth-title');
+            const btn = document.getElementById('btn-auth-action');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const nameInput = document.getElementById('loginName');
+            const phoneInput = document.getElementById('loginPhone');
+
+            if (isLoginMode) {
+                title.innerText = "Masuk Aplikasi";
+                btn.innerText = "MASUK";
+                toggleText.innerText = "Belum punya akun? Daftar disini";
+                nameInput.classList.add('hidden');
+                phoneInput.classList.add('hidden');
+            } else {
+                title.innerText = "Daftar Akun Baru";
+                btn.innerText = "DAFTAR SEKARANG";
+                toggleText.innerText = "Sudah punya akun? Masuk disini";
+                nameInput.classList.remove('hidden');
+                phoneInput.classList.remove('hidden');
+            }
+        }
+
+        async function handleAuthAction() {
+            const btn = document.getElementById('btn-auth-action');
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            if (!db) {
+                showToast("Error: Firebase Config belum diisi di kode!", "error");
+                return;
+            }
+
+            if (!email || !pass) {
+                showToast("Email dan Kata Sandi wajib diisi!", "error");
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showToast("Format email tidak valid.", "error");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "MEMPROSES...";
+
+            const userKey = sanitizeEmail(email);
+            const userRef = ref(db, 'users/' + userKey);
+
+            try {
+                const snapshot = await get(userRef);
+                const existingUser = snapshot.val();
+
+                if (isLoginMode) {
+                    // --- LOGIN LOGIC ---
+                    if (!existingUser) {
+                        showToast("Akun tidak ditemukan. Silakan daftar.", "error");
+                        btn.disabled = false; btn.innerText = "MASUK";
+                        return;
+                    }
+
+                    if (existingUser.pass !== pass) {
+                        showToast("Kata sandi salah!", "error");
+                        btn.disabled = false; btn.innerText = "MASUK";
+                        return;
+                    }
+
+                    // Login Success
+                    localStorage.setItem(SESSION_KEY, JSON.stringify(existingUser));
+                    showToast("Sugeng Rawuh, " + existingUser.name, "success");
+                    setTimeout(() => {
+                        showApp(existingUser);
+                        clearAuthInputs();
+                        btn.disabled = false; btn.innerText = "MASUK";
+                    }, 800);
+
+                } else {
+                    // --- REGISTER LOGIC ---
+                    const name = document.getElementById('loginName').value.trim();
+                    const phone = document.getElementById('loginPhone').value.trim();
+
+                    if (!name || !phone) {
+                        showToast("Lengkapi data pendaftaran!", "error");
+                        btn.disabled = false; btn.innerText = "DAFTAR SEKARANG";
+                        return;
+                    }
+
+                    if (existingUser) {
+                        showToast("Email sudah terdaftar. Silakan login.", "error");
+                        btn.disabled = false; btn.innerText = "DAFTAR SEKARANG";
+                        return;
+                    }
+
+                    if (pass.length < 6) {
+                        showToast("Kata sandi minimal 6 karakter.", "error");
+                        btn.disabled = false; btn.innerText = "DAFTAR SEKARANG";
+                        return;
+                    }
+
+                    // Prepare Data
+                    const newUser = {
+                        name: name,
+                        email: email,
+                        phone: phone,
+                        pass: pass, // In prod, hash this!
+                        joined: new Date().toLocaleDateString('id-ID'),
+                        isAdmin: (email === 'admin@lakusolo.com' && pass === 'admin123')
+                    };
+
+                    if(newUser.isAdmin) newUser.name = "Admin Laku Solo";
+
+                    // SAVE TO FIREBASE
+                    await set(userRef, newUser);
+                    
+                    // Auto Login
+                    localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
+                    showToast("Pendaftaran Berhasil!", "success");
+                    setTimeout(() => {
+                        showApp(newUser);
+                        clearAuthInputs();
+                        btn.disabled = false; btn.innerText = "DAFTAR SEKARANG";
+                    }, 800);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal menghubungi server. Periksa koneksi.", "error");
+                btn.disabled = false;
+                btn.innerText = isLoginMode ? "MASUK" : "DAFTAR SEKARANG";
+            }
+        }
+
+        function clearAuthInputs() {
+            document.getElementById('loginName').value = '';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPhone').value = '';
+            document.getElementById('loginPass').value = '';
+        }
+
+        function handleLogout() {
+            showConfirmDialog(
+                "Keluar Aplikasi",
+                "Apakah Anda yakin ingin keluar dari akun ini?",
+                () => {
+                    closeConfirm(); 
+                    localStorage.removeItem(SESSION_KEY);
+                    cart = []; // Reset cart on logout
+                    showToast("Berhasil keluar.", "success");
+                    setTimeout(() => location.reload(), 800);
+                }
+            );
+        }
+
+        function handleSwitchAccount() {
+            showConfirmDialog(
+                "Ganti Akun",
+                "Ganti ke akun lain?",
+                () => {
+                    closeConfirm();
+                    localStorage.removeItem(SESSION_KEY);
+                    cart = []; // Reset cart
+                    location.reload();
+                }
+            );
+        }
+
+        // --- ADMIN PANEL LOGIC (FIREBASE) ---
+        function openAdminPanel() {
+            hideAllSubPages();
+            document.getElementById('admin-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+            // Default load users
+            switchAdminTab('users');
+        }
+
+        function closeAdminPanel() {
+            switchTab('account');
+        }
+        
+        function switchAdminTab(tabName) {
+            // Update Tab UI
+            document.querySelectorAll('.admin-tab').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-btn-${tabName}`).classList.add('active');
+            
+            // Hide all containers
+            document.getElementById('admin-users-container').style.display = 'none';
+            document.getElementById('admin-orders-container').style.display = 'none';
+            document.getElementById('admin-chats-container').style.display = 'none';
+            
+            // Show selected container and load data
+            if (tabName === 'users') {
+                document.getElementById('admin-users-container').style.display = 'block';
+                loadAdminUsers();
+            } else if (tabName === 'orders') {
+                document.getElementById('admin-orders-container').style.display = 'block';
+                loadAdminOrders();
+            } else if (tabName === 'chats') {
+                document.getElementById('admin-chats-container').style.display = 'block';
+                loadAdminChatList();
+            }
+        }
+
+        async function loadAdminUsers() {
+            const listContainer = document.getElementById('admin-user-list');
+            listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Mengambil data...</div>';
+            
+            try {
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `users`));
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const usersArray = Object.values(data);
+                    
+                    document.getElementById('total-users-count').innerText = usersArray.length;
+                    renderUserList(usersArray.reverse());
+                } else {
+                    listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Belum ada data pengguna.</div>';
+                    document.getElementById('total-users-count').innerText = "0";
+                }
+            } catch (error) {
+                console.error(error);
+                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Gagal memuat data.</div>';
+            }
+        }
+        
+        async function loadAdminOrders() {
+            const listContainer = document.getElementById('admin-order-list');
+            listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Mengambil data pesanan...</div>';
+            
+            try {
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `orders`));
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    // Convert object to array with key ID included
+                    const ordersArray = Object.keys(data).map(key => {
+                        return { id: key, ...data[key] };
+                    });
+                    
+                    renderAdminOrders(ordersArray.reverse());
+                } else {
+                    listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Belum ada pesanan masuk.</div>';
+                }
+            } catch (error) {
+                console.error("Firebase Load Error:", error);
+                let msg = "Gagal memuat pesanan.";
+                if(error.code === 'PERMISSION_DENIED') {
+                    msg = "Akses Ditolak (Cek Rules Firebase)";
+                }
+                listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:red;">${msg}</div>`;
+            }
+        }
+
+        function renderUserList(users) {
+            const listContainer = document.getElementById('admin-user-list');
+            listContainer.innerHTML = '';
+
+            users.forEach(user => {
+                const isAdmin = user.isAdmin ? ' (Admin)' : '';
+                const deleteBtn = `<button class="btn-delete-user" onclick="deleteUser('${user.email}')"><i class="fa-solid fa-trash"></i></button>`;
+
+                const card = document.createElement('div');
+                card.className = 'user-card';
+                card.innerHTML = `
+                    <div class="user-card-header">
+                        <span class="user-card-name">${user.name} <small style="color:#E65100">${isAdmin}</small></span>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span class="user-card-date">${user.joined}</span>
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                    <div class="user-card-row">
+                        <i class="fa-solid fa-envelope"></i> ${user.email}
+                    </div>
+                    <div class="user-card-row">
+                        <i class="fa-brands fa-whatsapp"></i> ${user.phone}
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+        
+        function renderAdminOrders(orders) {
+            const listContainer = document.getElementById('admin-order-list');
+            listContainer.innerHTML = '';
+
+            orders.forEach(order => {
+                const isCompleted = order.status === 'completed';
+                const statusLabel = isCompleted ? 'Selesai' : 'Pending';
+                const statusClass = isCompleted ? 'status-completed' : 'status-pending';
+                
+                // --- BUG FIX: DEFENSIVE CODING ---
+                // Pastikan order.items ada (tidak undefined) sebelum di-map
+                const items = order.items || [];
+                
+                let itemsHtml = "";
+                if(items.length > 0) {
+                    itemsHtml = items.map(item => {
+                        let w = item.weight >= 1000 ? (item.weight/1000)+"kg" : item.weight+"gr";
+                        return `• ${item.name} (${w})`;
+                    }).join('<br>');
+                } else {
+                    itemsHtml = "<i>Tidak ada item (Data rusak/kosong)</i>";
+                }
+
+                // Create Action Buttons
+                let actionBtn = '';
+                if (!isCompleted) {
+                    actionBtn = `
+                        <button class="btn-action-admin" style="background:#E8F5E9; color:#2E7D32;" onclick="updateOrderStatus('${order.id}', 'completed')">
+                            <i class="fa-solid fa-check"></i> Selesai
+                        </button>`;
+                } else {
+                    actionBtn = `
+                        <button class="btn-action-admin" style="background:#FFF3E0; color:#EF6C00;" onclick="updateOrderStatus('${order.id}', 'pending')">
+                            <i class="fa-solid fa-rotate-left"></i> Batal Selesai
+                        </button>`;
+                }
+                
+                const deleteBtn = `
+                    <button class="btn-action-admin" style="background:#FFEBEE; color:#C62828;" onclick="deleteOrder('${order.id}')">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>`;
+
+                // WhatsApp Link
+                const waMsg = encodeURIComponent(`Halo ${order.userName}, pesanan Anda di Laku Solo sedang diproses. Total: ${formatCurrency(order.total)}.`);
+                const waLink = `https://wa.me/${order.userPhone.replace(/^0/, '62')}?text=${waMsg}`;
+
+                const card = document.createElement('div');
+                card.className = 'order-admin-card';
+                card.innerHTML = `
+                    <div class="order-admin-header">
+                        <div class="order-admin-id">#${order.id.slice(-6)} • ${order.dateDisplay || (order.timestamp ? order.timestamp.split('T')[0] : 'N/A')}</div>
+                        <span class="status-badge ${statusClass}">${statusLabel}</span>
+                    </div>
+                    <div class="order-admin-user">
+                        <div style="font-weight:600; font-size:14px;">${order.userName}</div>
+                         <a href="${waLink}" target="_blank" style="text-decoration:none; color:#25D366;"><i class="fa-brands fa-whatsapp"></i> Chat</a>
+                    </div>
+                    <div class="order-admin-items">
+                        ${itemsHtml}
+                    </div>
+                    <div class="order-admin-address">
+                        <i class="fa-solid fa-location-dot" style="margin-top:2px;"></i>
+                        <div>${order.shippingAddress} <br><i style="font-size:10px; color:#888;">Catatan: ${order.note || '-'}</i></div>
+                    </div>
+                    <div class="order-admin-footer">
+                        <div class="order-admin-total">${formatCurrency(order.total)} <span style="font-size:10px; font-weight:400; color:#888;">(${order.paymentMethod})</span></div>
+                        <div class="order-admin-actions">
+                            ${actionBtn}
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            showToast("Mengupdate status...", "info");
+            try {
+                await update(ref(db, 'orders/' + orderId), { status: newStatus });
+                showToast("Status diperbarui", "success");
+                loadAdminOrders(); // Refresh
+            } catch(e) {
+                console.error(e);
+                showToast("Gagal update status (Cek Koneksi/Izin)", "error");
+            }
+        }
+        
+        async function deleteOrder(orderId) {
+             showConfirmDialog(
+                "Hapus Pesanan",
+                "Pesanan ini akan dihapus permanen. Lanjutkan?",
+                async () => {
+                    closeConfirm();
+                    showToast("Menghapus...", "info");
+                    try {
+                        await remove(ref(db, 'orders/' + orderId));
+                        showToast("Pesanan dihapus.", "success");
+                        loadAdminOrders(); // Refresh list
+                    } catch(err) {
+                        showToast("Gagal menghapus pesanan.", "error");
+                    }
+                }
+            );
+        }
+
+        async function deleteUser(email) {
+            const currentUser = JSON.parse(localStorage.getItem(SESSION_KEY));
+            if(currentUser && currentUser.email === email) {
+                showToast("Tidak dapat menghapus akun sendiri!", "error");
+                return;
+            }
+
+            showConfirmDialog(
+                "Hapus Data Warga",
+                "Data ini akan dihapus permanen dari Database. Lanjutkan?",
+                async () => {
+                    closeConfirm();
+                    showToast("Menghapus...", "info");
+                    
+                    try {
+                        const userKey = sanitizeEmail(email);
+                        await remove(ref(db, 'users/' + userKey));
+                        showToast("Data berhasil dihapus.", "success");
+                        loadAdminUsers(); // Refresh list
+                    } catch(err) {
+                        showToast("Gagal menghapus data.", "error");
+                    }
+                }
+            );
+        }
+
+        // --- SHOP & ORDER LOGIC (PERSISTENT & WEIGHT BASED) ---
+        
+        async function syncCartToDatabase() {
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) return;
+
+            const user = JSON.parse(userJSON);
+            const userKey = sanitizeEmail(user.email);
+            
+            // Simpan ke Firebase
+            try {
+                await update(ref(db, 'users/' + userKey), { cart: cart });
+            } catch(e) {
+                console.error("Gagal sync cart", e);
+            }
+
+            // Simpan ke Local Storage
+            user.cart = cart;
+            localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        }
+
+        function openShop() {
+            hideAllSubPages();
+            document.getElementById('shop-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('product-list-container');
+            container.innerHTML = products.map(p => `
+                <div class="product-card">
+                    <div class="prod-img-box"><img src="${p.img}" alt="${p.name}"></div>
+                    <div class="prod-title">${p.name}</div>
+                    <div class="prod-price">Rp ${p.price.toLocaleString()} / kg</div>
+                    <button class="btn-add-cart" onclick="openProductModal(${p.id})">
+                        <i class="fa-solid fa-plus"></i> Tambah
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // --- MODAL LOGIC (Manual Input + Unit Toggle + Edit Mode) ---
+        function openProductModal(productId, isEditMode = false) {
+            currentModalProduct = products.find(p => p.id === productId);
+            if (!currentModalProduct) return;
+
+            // Determine Weight source
+            if (isEditMode) {
+                const existingItem = cart.find(item => item.id === productId);
+                if (existingItem) {
+                    currentWeight = existingItem.weight;
+                    editingCartItemId = productId; // Set flag that we are editing
+                    
+                    // UI Update for Edit Mode
+                    document.getElementById('modal-action-label').innerText = "Edit Jumlah:";
+                    document.getElementById('btn-modal-submit').innerHTML = '<i class="fa-solid fa-check"></i> Simpan Perubahan';
+                } else {
+                    return; // Should not happen
+                }
+            } else {
+                // Add New Mode
+                currentWeight = 1000;
+                editingCartItemId = null; // Clear flag
+                
+                // UI Update for Add Mode
+                document.getElementById('modal-action-label').innerText = "Pilih Berat:";
+                document.getElementById('btn-modal-submit').innerHTML = '<i class="fa-solid fa-cart-plus"></i> Masukkan Keranjang';
+            }
+
+            // Set Unit to KG by default unless small amount
+            currentUnit = currentWeight < 1000 ? 'gr' : 'kg';
+
+            document.getElementById('modal-prod-name').innerText = currentModalProduct.name;
+            document.getElementById('modal-prod-price').innerText = "Rp " + currentModalProduct.price.toLocaleString() + " / kg";
+            document.getElementById('modal-prod-img').src = currentModalProduct.img;
+            
+            updateModalCalculation();
+            
+            // Show Modal
+            document.getElementById('product-modal-overlay').classList.add('active');
+            document.getElementById('product-modal').classList.add('active');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal-overlay').classList.remove('active');
+            document.getElementById('product-modal').classList.remove('active');
+        }
+
+        function toggleUnit() {
+            // Switch unit between 'kg' and 'gr'
+            currentUnit = currentUnit === 'kg' ? 'gr' : 'kg';
+            document.getElementById('unit-label').innerText = currentUnit;
+            updateModalCalculation();
+        }
+
+        function calculateFromInput() {
+            const val = parseFloat(document.getElementById('weight-input').value);
+            if (isNaN(val) || val < 0) return;
+
+            // Convert Input Value back to Grams for internal storage
+            if (currentUnit === 'kg') {
+                currentWeight = val * 1000;
+            } else {
+                currentWeight = val;
+            }
+            
+            // Recalculate price only
+            const totalPrice = (currentWeight / 1000) * currentModalProduct.price;
+            document.getElementById('modal-total-price').innerText = "Rp " + Math.ceil(totalPrice).toLocaleString();
+            
+            // Clear preset active state
+             document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        function adjustWeight(amount) {
+            currentWeight += amount;
+            if (currentWeight < 0) currentWeight = 0;
+            
+            updateModalCalculation();
+        }
+
+        function setPresetWeight(grams) {
+            currentWeight = grams;
+            // Update unit to match the preset natural unit for better UX
+            currentUnit = grams >= 1000 ? 'kg' : 'gr';
+            
+            // Reset active preset classes
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                if(btn.innerText.includes(grams >= 1000 ? (grams/1000) + ' kg' : grams + ' gr')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            updateModalCalculation();
+        }
+
+        function updateModalCalculation() {
+            const inputEl = document.getElementById('weight-input');
+            const unitLabel = document.getElementById('unit-label');
+
+            // Update Input Value based on current internal weight (grams) & selected unit
+            if (currentUnit === 'kg') {
+                inputEl.value = currentWeight / 1000;
+                unitLabel.innerText = 'kg';
+            } else {
+                inputEl.value = currentWeight;
+                unitLabel.innerText = 'gr';
+            }
+
+            // Calculate Price (Weight/1000 * PricePerKg)
+            const totalPrice = (currentWeight / 1000) * currentModalProduct.price;
+            document.getElementById('modal-total-price').innerText = "Rp " + Math.ceil(totalPrice).toLocaleString();
+        }
+
+        function submitToCart() {
+            if (!currentModalProduct) return;
+            if (currentWeight <= 0) {
+                showToast("Berat tidak boleh 0", "error");
+                return;
+            }
+
+            if (editingCartItemId !== null) {
+                // --- EDIT MODE: UPDATE EXISTING ITEM ---
+                const existingItem = cart.find(item => item.id === editingCartItemId);
+                if (existingItem) {
+                    existingItem.weight = currentWeight;
+                    showToast("Jumlah berhasil diubah", 'success');
+                }
+            } else {
+                // --- ADD MODE: ADD OR ACCUMULATE ---
+                const existingItem = cart.find(item => item.id === currentModalProduct.id);
+                if (existingItem) {
+                    existingItem.weight = (existingItem.weight || 0) + currentWeight;
+                } else {
+                    cart.push({ 
+                        ...currentModalProduct, 
+                        weight: currentWeight 
+                    });
+                }
+                showToast(`${currentModalProduct.name} ditambahkan`, 'success');
+            }
+
+            updateCartUI();
+            if(document.getElementById('order-view').style.display === 'block') {
+                renderOrders(); // Refresh cart view if open
+            }
+            syncCartToDatabase();
+            closeProductModal();
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCartUI();
+            renderOrders();
+            syncCartToDatabase();
+        }
+
+        function updateCartUI() {
+            document.getElementById('header-cart-badge').innerText = cart.length;
+            
+            const shopBadge = document.getElementById('shop-cart-badge');
+            if (cart.length > 0) {
+                shopBadge.innerText = cart.length;
+                shopBadge.style.display = 'flex';
+            } else {
+                shopBadge.style.display = 'none';
+            }
+
+            const headerBadge = document.getElementById('header-cart-badge');
+            if (cart.length > 0) {
+                headerBadge.innerText = cart.length;
+                headerBadge.classList.add('active');
+            } else {
+                headerBadge.classList.remove('active');
+            }
+        }
+
+        function openOrders() {
+            hideAllSubPages();
+            document.getElementById('order-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('order-list-container');
+            const summaryBox = document.getElementById('order-summary-box');
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; margin-top:50px; color:#888;">
+                        <i class="fa-solid fa-basket-shopping" style="font-size:50px; margin-bottom:15px; color:#ddd;"></i>
+                        <p>Keranjang belanja masih kosong.</p>
+                        <button class="btn-visit" onclick="openShop()" style="margin-top:15px;">Mulai Belanja</button>
+                    </div>`;
+                summaryBox.style.display = 'none';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map(item => {
+                // Calculate item total based on weight
+                const itemTotal = (item.weight / 1000) * item.price;
+                total += itemTotal;
+                
+                // Format Weight Text
+                let weightText = item.weight + " gram";
+                if (item.weight >= 1000) {
+                    weightText = (item.weight / 1000) + " kg";
+                }
+
+                return `
+                <div class="cart-item">
+                    <img src="${item.img}" class="cart-img">
+                    <div class="cart-info">
+                        <div class="cart-title">${item.name}</div>
+                        <div class="cart-price">Rp ${Math.ceil(itemTotal).toLocaleString()}</div>
+                        <div class="cart-qty">Berat: ${weightText}</div>
+                    </div>
+                    <div class="cart-actions">
+                        <button class="btn-edit" onclick="openProductModal(${item.id}, true)">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="btn-remove" onclick="removeFromCart(${item.id})">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `}).join('');
+
+            document.getElementById('order-total-price').innerText = "Rp " + Math.ceil(total).toLocaleString();
+            summaryBox.style.display = 'flex';
+        }
+
+        // --- CHECKOUT LOGIC (NEW) ---
+        function openCheckout() {
+            if (cart.length === 0) {
+                showToast("Keranjang kosong!", "error");
+                return;
+            }
+
+            hideAllSubPages();
+            document.getElementById('checkout-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+
+            // Calculate Totals
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += (item.weight / 1000) * item.price;
+            });
+
+            document.getElementById('checkout-subtotal').innerText = formatCurrency(subtotal);
+            document.getElementById('checkout-shipping').innerText = formatCurrency(shippingCost);
+            document.getElementById('checkout-total').innerText = formatCurrency(subtotal + shippingCost);
+            document.getElementById('checkout-bar-total').innerText = formatCurrency(subtotal + shippingCost);
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('active'));
+            
+            if (method === 'COD') {
+                document.getElementById('pay-cod').classList.add('active');
+            } else {
+                document.getElementById('pay-qris').classList.add('active');
+            }
+        }
+
+        async function placeOrder() {
+            const address = document.getElementById('checkout-address').value.trim();
+            const note = document.getElementById('checkout-note').value.trim();
+
+            if (!address) {
+                showToast("Mohon isi alamat pengiriman!", "error");
+                document.getElementById('checkout-address').focus();
+                return;
+            }
+
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) {
+                showToast("Sesi habis. Silakan login kembali.", "error");
+                showLogin();
+                return;
+            }
+            const user = JSON.parse(userJSON);
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += (item.weight / 1000) * item.price;
+            });
+            const total = subtotal + shippingCost;
+
+            // --- PERBAIKAN: Pastikan tidak ada data undefined ---
+            const orderData = {
+                userEmail: user.email || "no-email",
+                userName: user.name || "Warga",
+                userPhone: user.phone || "-",
+                items: cart,
+                shippingAddress: address,
+                note: note || "-", 
+                paymentMethod: selectedPaymentMethod,
+                subtotal: subtotal,
+                shippingCost: shippingCost,
+                total: total,
+                status: 'pending', 
+                timestamp: new Date().toISOString(),
+                dateDisplay: new Date().toLocaleString('id-ID')
+            };
+
+            showToast("Memproses pesanan...", "info");
+
+            try {
+                // Save to Firebase under 'orders/'
+                const ordersRef = ref(db, 'orders');
+                await push(ordersRef, orderData);
+
+                // Clear Cart
+                cart = [];
+                syncCartToDatabase();
+                updateCartUI();
+
+                // Show Success Modal
+                document.getElementById('success-modal').classList.add('active');
+
+            } catch (error) {
+                console.error("Order Error: ", error);
+                
+                // Tampilkan detail error yang sebenarnya
+                let errMsg = "Gagal: " + error.message;
+                
+                // Deteksi error spesifik
+                if(error.code === "PERMISSION_DENIED") {
+                    errMsg = "Gagal: Database terkunci. Ubah Rules Firebase jadi 'true'.";
+                } else if (error.message && error.message.includes("undefined")) {
+                    errMsg = "Gagal: Data akun tidak lengkap (refresh halaman).";
+                }
+                
+                showToast(errMsg, "error");
+            }
+        }
+
+        function closeCheckoutSuccess() {
+            document.getElementById('success-modal').classList.remove('active');
+            switchTab('home');
+            // Clear inputs
+            document.getElementById('checkout-address').value = '';
+            document.getElementById('checkout-note').value = '';
+        }
+
+        // --- CHAT LOGIC (REALTIME) ---
+        
+        function openChat() {
+            hideAllSubPages();
+            
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) {
+                showLogin();
+                return;
+            }
+            const user = JSON.parse(userJSON);
+            
+            // If user is Admin, they should see the Admin Panel Chats tab, not talk to themselves
+            if (user.isAdmin) {
+                openAdminPanel();
+                switchAdminTab('chats');
+                return;
+            }
+
+            // Normal User Logic
+            document.getElementById('chat-view').style.display = 'flex'; // Use flex for sticky footer
+            document.querySelector('.bottom-nav').style.display = 'none';
+            
+            const userKey = sanitizeEmail(user.email);
+            currentChatUserKey = userKey;
+            
+            // UI Reset
+            document.getElementById('chat-header-name').innerText = "Admin Laku Solo";
+            document.getElementById('chat-header-status').innerText = "Online";
+            document.getElementById('chat-messages-container').innerHTML = ''; // Clear old msgs
+            
+            // Listen to messages
+            listenToChat(userKey);
+        }
+
+        function listenToChat(chatKey) {
+            // Detach previous listener if any
+            if (activeChatListener) {
+                off(activeChatListener);
+            }
+
+            const chatRef = ref(db, `chats/${chatKey}/messages`);
+            
+            // Attach new listener
+            const messagesContainer = document.getElementById('chat-messages-container');
+            
+            activeChatListener = ref(db, `chats/${chatKey}/messages`);
+            onValue(activeChatListener, (snapshot) => {
+                messagesContainer.innerHTML = ''; // Clear and redraw (simple approach)
+                
+                if (snapshot.exists()) {
+                    const msgs = snapshot.val();
+                    // Sort by timestamp
+                    const sortedMsgs = Object.values(msgs).sort((a,b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    
+                    const currentUser = JSON.parse(localStorage.getItem(SESSION_KEY));
+                    const isUserAdmin = currentUser.isAdmin;
+
+                    sortedMsgs.forEach(msg => {
+                        const div = document.createElement('div');
+                        // Determine bubble side: 
+                        // If I am Admin -> msg.sender == 'admin' is ME
+                        // If I am User -> msg.sender == 'user' is ME
+                        let isMe = false;
+                        if (isUserAdmin && msg.sender === 'admin') isMe = true;
+                        if (!isUserAdmin && msg.sender === 'user') isMe = true;
+
+                        // --- READ RECEIPT LOGIC ---
+                        // If I am receiving this message (isMe is false), and it's not read yet -> mark as read
+                        if (!isMe && !msg.read) {
+                            // Find key of this message to update it
+                            const msgKey = Object.keys(msgs).find(key => msgs[key] === msg);
+                            if (msgKey) {
+                                // Mark as read in DB (prevent infinite loop by checking !msg.read)
+                                update(ref(db, `chats/${chatKey}/messages/${msgKey}`), { read: true });
+                            }
+                        }
+
+                        div.className = `message-bubble ${isMe ? 'me' : 'other'}`;
+                        
+                        const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        
+                        // Check icons
+                        let checks = '';
+                        if (isMe) {
+                            const checkColor = msg.read ? 'check-read' : 'check-sent';
+                            checks = `<span class="check-icon ${checkColor}"><i class="fa-solid fa-check-double"></i></span>`;
+                        }
+
+                        div.innerHTML = `
+                            ${msg.text}
+                            <div class="message-footer">
+                                <span class="message-time">${time}</span>
+                                ${checks}
+                            </div>
+                        `;
+                        messagesContainer.appendChild(div);
+                    });
+                    
+                    // Auto scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                } else {
+                    messagesContainer.innerHTML = `<div style="text-align:center; margin-top:20px; color:#888; font-size:12px; background:rgba(255,255,255,0.6); padding:10px; border-radius:10px; align-self:center;">
+                        Belum ada pesan. Sapa Admin sekarang!
+                    </div>`;
+                }
+            });
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) return;
+            const user = JSON.parse(userJSON);
+            const userKey = currentChatUserKey; // Needs to be set when opening chat
+
+            if (!userKey) {
+                console.error("No chat target selected");
+                return;
+            }
+
+            const senderRole = user.isAdmin ? 'admin' : 'user';
+            
+            const msgData = {
+                text: text,
+                sender: senderRole,
+                timestamp: new Date().toISOString(),
+                read: false // Default unread
+            };
+
+            // Push message
+            await push(ref(db, `chats/${userKey}/messages`), msgData);
+            
+            // Update metadata for list view
+            await update(ref(db, `chats/${userKey}`), {
+                lastMessage: text,
+                lastTimestamp: new Date().toISOString(),
+                userName: user.isAdmin ? (document.getElementById('chat-header-name').innerText) : user.name, // If admin sending, keep user name. If user sending, update name.
+                userEmail: user.isAdmin ? null : user.email // Keep email ref if user sends
+            });
+            
+            // If user sending, make sure name/email is set correctly in metadata
+            if (!user.isAdmin) {
+                 await update(ref(db, `chats/${userKey}`), {
+                    userName: user.name,
+                    userEmail: user.email
+                });
+            }
+
+            input.value = '';
+        }
+
+        // --- NOTIFICATION MONITOR (USER SIDE) ---
+        function monitorUnreadMessages(userKey) {
+            const chatRef = ref(db, `chats/${userKey}/messages`);
+            onValue(chatRef, (snapshot) => {
+                let count = 0;
+                if (snapshot.exists()) {
+                    const msgs = snapshot.val();
+                    Object.values(msgs).forEach(msg => {
+                        // Count messages from 'admin' that are not read
+                        if (msg.sender === 'admin' && !msg.read) {
+                            count++;
+                        }
+                    });
+                }
+                
+                const badge = document.getElementById('nav-chat-badge');
+                if (count > 0) {
+                    badge.innerText = count;
+                    badge.classList.add('active');
+                } else {
+                    badge.classList.remove('active');
+                }
+            });
+        }
+
+        // --- ADMIN CHAT LIST LOGIC ---
+        function loadAdminChatList() {
+            const container = document.getElementById('admin-chat-list');
+            container.innerHTML = '<div style="text-align:center; color:#888;">Memuat...</div>';
+            
+            const chatsRef = ref(db, 'chats');
+            onValue(chatsRef, (snapshot) => {
+                container.innerHTML = '';
+                if (snapshot.exists()) {
+                    const chats = snapshot.val();
+                    // Convert to array and sort by lastTimestamp descending
+                    const chatArray = Object.keys(chats).map(key => {
+                        return { key: key, ...chats[key] };
+                    }).sort((a,b) => new Date(b.lastTimestamp) - new Date(a.lastTimestamp));
+
+                    if (chatArray.length === 0) {
+                        container.innerHTML = '<div style="text-align:center; padding:20px;">Belum ada percakapan.</div>';
+                        return;
+                    }
+
+                    chatArray.forEach(chat => {
+                        const time = new Date(chat.lastTimestamp).toLocaleDateString() + ' ' + new Date(chat.lastTimestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                        
+                        // Calculate unread for admin
+                        let unreadCount = 0;
+                        if (chat.messages) {
+                            Object.values(chat.messages).forEach(m => {
+                                if (m.sender === 'user' && !m.read) unreadCount++;
+                            });
+                        }
+
+                        let badgeHtml = '';
+                        if (unreadCount > 0) {
+                            badgeHtml = `<span class="chat-unread-badge">${unreadCount}</span>`;
+                        }
+
+                        const item = document.createElement('div');
+                        item.className = 'chat-list-item';
+                        item.onclick = () => openAdminChatWithUser(chat.key, chat.userName);
+                        item.innerHTML = `
+                            <div class="chat-list-avatar"><i class="fa-solid fa-user"></i></div>
+                            <div class="chat-list-info">
+                                <div class="chat-list-name">${chat.userName || 'Warga'}</div>
+                                <div class="chat-list-preview">${chat.lastMessage || '...'}</div>
+                            </div>
+                            <div class="chat-list-meta">
+                                <span class="chat-list-time">${time}</span>
+                                ${badgeHtml}
+                            </div>
+                        `;
+                        container.appendChild(item);
+                    });
+
+                } else {
+                    container.innerHTML = '<div style="text-align:center; padding:20px;">Belum ada percakapan.</div>';
+                }
+            });
+        }
+
+        function openAdminChatWithUser(userKey, userName) {
+            // Re-use the Chat View but configured for Admin
+            document.getElementById('admin-view').style.display = 'none'; // Hide admin panel temporarily
+            document.getElementById('chat-view').style.display = 'flex';
+            
+            // Set header for Admin perspective
+            document.getElementById('chat-header-name').innerText = userName;
+            document.getElementById('chat-header-status').innerText = "Warga";
+            
+            // Override back button behavior for Admin
+            const backBtn = document.querySelector('#chat-view .back-btn');
+            const oldOnClick = backBtn.onclick; // Save original
+            
+            backBtn.onclick = () => {
+                document.getElementById('chat-view').style.display = 'none';
+                document.getElementById('admin-view').style.display = 'block';
+                // Restore original handler
+                backBtn.onclick = () => switchTab('home'); 
+                // Stop listener
+                if (activeChatListener) off(activeChatListener);
+            };
+
+            currentChatUserKey = userKey;
+            listenToChat(userKey);
+        }
+
+        // --- VIEW MANAGEMENT ---
+        function showLogin() {
+            document.getElementById('login-view').classList.add('active');
+            document.getElementById('app-view').classList.remove('active');
+            isLoginMode = true;
+            
+            // Reset UI state manually
+            document.getElementById('auth-title').innerText = "Masuk Aplikasi";
+            document.getElementById('btn-auth-action').innerText = "MASUK";
+            document.getElementById('auth-toggle-text').innerText = "Belum punya akun? Daftar disini";
+            document.getElementById('loginName').classList.add('hidden');
+            document.getElementById('loginPhone').classList.add('hidden');
+        }
+
+        async function showApp(user) {
+            document.getElementById('login-view').classList.remove('active');
+            document.getElementById('app-view').classList.add('active');
+            
+            document.getElementById('headerUserName').innerText = user.name;
+            document.getElementById('accountUserName').innerText = user.name;
+            
+            // Update Profile Avatar
+            const defaultAvatar = "https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/219/2025/02/03/Di-era-digital-saat-ini-banyak-orang-menggunakan-foto-profil-WhatsApp-untuk-menunjukkan-identitas-ekspresi-diri-atau-sekadar-memberikan-kesan-tertentu-kepada-kontak-mereka-Namun-ada-juga-seba-3803796639.png";
+            const avatarUrl = user.photoUrl || defaultAvatar;
+            document.getElementById('headerAvatar').src = avatarUrl;
+            document.getElementById('accountAvatar').src = avatarUrl;
+            
+            if(user.email) document.getElementById('accountUserEmail').innerText = user.email;
+            if(user.phone) document.getElementById('accountUserPhone').innerText = user.phone;
+
+            if (user.isAdmin) {
+                document.getElementById('accountBadge').innerText = "Administrator";
+                document.getElementById('accountBadge').style.background = "#FFECB3";
+                document.getElementById('accountBadge').style.color = "#E65100";
+                document.getElementById('btn-admin-panel').style.display = 'flex';
+            } else {
+                document.getElementById('accountBadge').innerText = "Warga Solo Setia";
+                document.getElementById('accountBadge').style.background = "#FFF8E1";
+                document.getElementById('accountBadge').style.color = "#FBC02D";
+                document.getElementById('btn-admin-panel').style.display = 'none';
+                
+                // START MONITORING NOTIFICATIONS FOR USER
+                const userKey = sanitizeEmail(user.email);
+                monitorUnreadMessages(userKey);
+            }
+            switchTab('home');
+
+            // --- LOAD CART FROM DATABASE (PERSISTENT LOGIC) ---
+            if (user.cart) {
+                cart = user.cart; // Load from local first
+                updateCartUI();
+            }
+
+            try {
+                const userKey = sanitizeEmail(user.email);
+                const snapshot = await get(child(ref(db), 'users/' + userKey + '/cart'));
+                if (snapshot.exists()) {
+                    cart = snapshot.val();
+                    updateCartUI();
+                    
+                    // Sync back to local storage
+                    user.cart = cart;
+                    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+                }
+            } catch (e) {
+                console.log("Offline mode or sync error");
+            }
+        }
+
+        // Helper to safely hide sub-pages without hiding the main app container
+        function hideAllSubPages() {
+            document.getElementById('tab-home').style.display = 'none';
+            document.getElementById('tab-account').style.display = 'none';
+            
+            document.getElementById('shop-view').style.display = 'none';
+            document.getElementById('order-view').style.display = 'none';
+            document.getElementById('checkout-view').style.display = 'none'; 
+            document.getElementById('admin-view').style.display = 'none';
+            document.getElementById('history-view').style.display = 'none';
+            document.getElementById('chat-view').style.display = 'none';
+            document.getElementById('edit-profile-view').style.display = 'none';
+            document.getElementById('saved-address-view').style.display = 'none'; // Added Saved Address View
+            document.getElementById('market-detail-view').style.display = 'none'; // Added Market Detail View
+            
+            // Ensure App View is always visible
+            document.getElementById('app-view').style.display = 'block';
+        }
+
+        function switchTab(tabName) {
+            hideAllSubPages();
+            
+            document.querySelector('.bottom-nav').style.display = 'flex';
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            if (tabName === 'home') {
+                document.getElementById('tab-home').style.display = 'block';
+                document.getElementById('nav-home').classList.add('active');
+            } else if (tabName === 'account') {
+                document.getElementById('tab-account').style.display = 'block';
+                document.getElementById('nav-account').classList.add('active');
+            }
+        }
+
+        // --- HISTORY LOGIC ---
+        function openHistory() {
+            hideAllSubPages();
+            document.getElementById('history-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+            
+            loadUserHistory();
+        }
+
+        async function loadUserHistory() {
+            const listContainer = document.getElementById('history-list-container');
+            listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Memuat riwayat transaksi...</div>';
+
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) return;
+            const currentUser = JSON.parse(userJSON);
+
+            try {
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `orders`));
+                
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const allOrders = Object.keys(data).map(key => {
+                        return { id: key, ...data[key] };
+                    });
+
+                    const myOrders = allOrders.filter(order => order.userEmail === currentUser.email);
+                    
+                    if (myOrders.length === 0) {
+                         listContainer.innerHTML = `
+                            <div style="text-align:center; padding:40px 20px; color:#888;">
+                                <i class="fa-solid fa-receipt" style="font-size:40px; color:#ddd; margin-bottom:15px;"></i>
+                                <p>Belum ada riwayat belanja.</p>
+                                <button class="btn-visit" onclick="openShop()" style="margin-top:15px;">Mulai Belanja</button>
+                            </div>`;
+                    } else {
+                        renderHistoryList(myOrders.reverse());
+                    }
+                } else {
+                     listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Belum ada riwayat belanja.</div>';
+                }
+            } catch (error) {
+                console.error(error);
+                listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:red;">Gagal memuat riwayat.</div>';
+            }
+        }
+
+        function renderHistoryList(orders) {
+            const listContainer = document.getElementById('history-list-container');
+            listContainer.innerHTML = '';
+
+            orders.forEach(order => {
+                const isCompleted = order.status === 'completed';
+                const statusLabel = isCompleted ? 'Selesai' : 'Sedang Diproses';
+                const statusClass = isCompleted ? 'completed' : 'pending';
+                const statusBadgeClass = isCompleted ? 'status-completed' : 'status-pending';
+                
+                const items = order.items || [];
+                let itemsHtml = "";
+                if(items.length > 0) {
+                    itemsHtml = items.map(item => {
+                        let w = item.weight >= 1000 ? (item.weight/1000)+"kg" : item.weight+"gr";
+                        return `• ${item.name} (${w})`;
+                    }).join('<br>');
+                } else {
+                    itemsHtml = "<i>Tidak ada item</i>";
+                }
+
+                const card = document.createElement('div');
+                card.className = `history-card ${statusClass}`;
+                card.innerHTML = `
+                    <div class="order-admin-header">
+                        <div class="order-admin-id">#${order.id.slice(-6)} • ${order.dateDisplay || (order.timestamp ? order.timestamp.split('T')[0] : 'N/A')}</div>
+                        <span class="status-badge ${statusBadgeClass}">${statusLabel}</span>
+                    </div>
+                    <div class="order-admin-items">
+                        ${itemsHtml}
+                    </div>
+                    <div class="order-admin-address">
+                        <i class="fa-solid fa-location-dot" style="margin-top:2px;"></i>
+                        <div>${order.shippingAddress}</div>
+                    </div>
+                    <div class="order-admin-footer">
+                        <div class="order-admin-total">${formatCurrency(order.total)}</div>
+                        <div style="font-size:11px; color:#888;">${order.paymentMethod}</div>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // --- PROFILE EDIT LOGIC ---
+        function openEditProfile() {
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) return;
+            const user = JSON.parse(userJSON);
+
+            hideAllSubPages();
+            document.getElementById('edit-profile-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+
+            document.getElementById('edit-name').value = user.name || "";
+            document.getElementById('edit-phone').value = user.phone || "";
+            document.getElementById('edit-email').value = user.email || "";
+            
+            const defaultAvatar = "https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/219/2025/02/03/Di-era-digital-saat-ini-banyak-orang-menggunakan-foto-profil-WhatsApp-untuk-menunjukkan-identitas-ekspresi-diri-atau-sekadar-memberikan-kesan-tertentu-kepada-kontak-mereka-Namun-ada-juga-seba-3803796639.png";
+            const currentPhoto = user.photoUrl || defaultAvatar;
+            
+            document.getElementById('edit-avatar-img').src = currentPhoto;
+            document.getElementById('edit-avatar-url').value = user.photoUrl || "";
+        }
+
+        function updateAvatarPreview(url) {
+            const img = document.getElementById('edit-avatar-img');
+            const defaultAvatar = "https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/219/2025/02/03/Di-era-digital-saat-ini-banyak-orang-menggunakan-foto-profil-WhatsApp-untuk-menunjukkan-identitas-ekspresi-diri-atau-sekadar-memberikan-kesan-tertentu-kepada-kontak-mereka-Namun-ada-juga-seba-3803796639.png";
+            
+            if(url && url.length > 5) {
+                img.src = url;
+                img.onerror = function() { this.src = defaultAvatar; };
+            } else {
+                img.src = defaultAvatar;
+            }
+        }
+
+        async function saveProfileChanges() {
+            const newName = document.getElementById('edit-name').value.trim();
+            const newPhone = document.getElementById('edit-phone').value.trim();
+            const newPhotoUrl = document.getElementById('edit-avatar-url').value.trim();
+            
+            if (!newName) {
+                showToast("Nama tidak boleh kosong", "error");
+                return;
+            }
+
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) return;
+            const user = JSON.parse(userJSON);
+            const userKey = sanitizeEmail(user.email);
+
+            const updatedData = {
+                name: newName,
+                phone: newPhone,
+                photoUrl: newPhotoUrl
+            };
+
+            showToast("Menyimpan profil...", "info");
+
+            try {
+                await update(ref(db, 'users/' + userKey), updatedData);
+                const updatedUser = { ...user, ...updatedData };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(updatedUser));
+                showApp(updatedUser);
+                showToast("Profil berhasil diperbarui", "success");
+                setTimeout(() => switchTab('account'), 500);
+            } catch (error) {
+                console.error(error);
+                showToast("Gagal menyimpan perubahan.", "error");
+            }
+        }
+
+        // --- SAVED ADDRESS LOGIC (NEW) ---
+        function openSavedAddresses() {
+            hideAllSubPages();
+            document.getElementById('saved-address-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) return;
+            const user = JSON.parse(userJSON);
+            const userKey = sanitizeEmail(user.email);
+
+            const listContainer = document.getElementById('address-list-container');
+            listContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Memuat alamat...</div>';
+
+            get(child(ref(db), `users/${userKey}/addresses`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const addresses = snapshot.val();
+                    listContainer.innerHTML = Object.entries(addresses).map(([key, addr]) => `
+                        <div class="address-card">
+                            <h4>${addr.label}</h4>
+                            <p><b>${addr.recipient}</b> (${addr.phone})</p>
+                            <p>${addr.fullAddress}</p>
+                            <button class="btn-delete-addr" onclick="deleteAddress('${key}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    listContainer.innerHTML = '<div style="text-align:center; margin-top:50px; color:#888;">Belum ada alamat tersimpan.</div>';
+                }
+            }).catch((error) => {
+                console.error(error);
+                listContainer.innerHTML = '<div style="text-align:center; color:red;">Gagal memuat alamat.</div>';
+            });
+        }
+
+        function openAddressModal() {
+            document.getElementById('address-modal-overlay').classList.add('active');
+            document.getElementById('address-modal').classList.add('active');
+        }
+
+        function closeAddressModal() {
+            document.getElementById('address-modal-overlay').classList.remove('active');
+            document.getElementById('address-modal').classList.remove('active');
+        }
+
+        async function saveAddress() {
+            const label = document.getElementById('new-addr-label').value.trim();
+            const recipient = document.getElementById('new-addr-recipient').value.trim();
+            const phone = document.getElementById('new-addr-phone').value.trim();
+            const fullAddress = document.getElementById('new-addr-full').value.trim();
+
+            if (!label || !recipient || !phone || !fullAddress) {
+                showToast("Mohon lengkapi semua data alamat!", "error");
+                return;
+            }
+
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) return;
+            const user = JSON.parse(userJSON);
+            const userKey = sanitizeEmail(user.email);
+
+            const newAddress = {
+                label,
+                recipient,
+                phone,
+                fullAddress
+            };
+
+            try {
+                await push(ref(db, `users/${userKey}/addresses`), newAddress);
+                showToast("Alamat berhasil disimpan", "success");
+                closeAddressModal();
+                openSavedAddresses(); // Refresh list
+                
+                // Clear inputs
+                document.getElementById('new-addr-label').value = '';
+                document.getElementById('new-addr-recipient').value = '';
+                document.getElementById('new-addr-phone').value = '';
+                document.getElementById('new-addr-full').value = '';
+            } catch (error) {
+                console.error(error);
+                showToast("Gagal menyimpan alamat.", "error");
+            }
+        }
+
+        async function deleteAddress(addressKey) {
+            showConfirmDialog(
+                "Hapus Alamat",
+                "Apakah Anda yakin ingin menghapus alamat ini?",
+                async () => {
+                    closeConfirm();
+                    const userJSON = localStorage.getItem(SESSION_KEY);
+                    if (!userJSON) return;
+                    const user = JSON.parse(userJSON);
+                    const userKey = sanitizeEmail(user.email);
+
+                    try {
+                        await remove(ref(db, `users/${userKey}/addresses/${addressKey}`));
+                        showToast("Alamat dihapus", "success");
+                        openSavedAddresses(); // Refresh list
+                    } catch (error) {
+                        console.error(error);
+                        showToast("Gagal menghapus alamat.", "error");
+                    }
+                }
+            );
+        }
+
+        // --- MARKET RATING & REVIEW LOGIC (REAL-TIME) ---
+        let currentDetailMarketId = null;
+        let activeReviewListener = null;
+        let globalRatingListeners = [];
+
+        function renderMarkets(userLat, userLng) {
+            const container = document.getElementById('market-list-dynamic');
+            let sortedMarkets = [...marketsData]; // Copy array
+
+            if (userLat && userLng) {
+                // Calculate distance for each market
+                sortedMarkets = sortedMarkets.map(m => {
+                    const dist = getDistanceFromLatLonInKm(userLat, userLng, m.lat, m.lng);
+                    return { ...m, distance: dist };
+                });
+                
+                // Sort by distance
+                sortedMarkets.sort((a, b) => a.distance - b.distance);
+            } else {
+                // Default Distance
+                const centerLat = -7.5755;
+                const centerLng = 110.8243;
+                sortedMarkets = sortedMarkets.map(m => {
+                    const dist = getDistanceFromLatLonInKm(centerLat, centerLng, m.lat, m.lng);
+                    return { ...m, distance: dist };
+                });
+            }
+
+            // Remove old listeners to prevent memory leaks if re-rendered
+            globalRatingListeners.forEach(listener => off(listener));
+            globalRatingListeners = [];
+
+            container.innerHTML = sortedMarkets.map(m => `
+                <div class="market-card">
+                    <img src="${m.img}" alt="${m.name}" class="market-img">
+                    <div class="market-info">
+                        <div class="market-name">${m.name}</div>
+                        <div class="market-meta">
+                            <span><i class="fa-solid fa-location-dot"></i> ${m.distance.toFixed(1)} km</span>
+                            <span class="rating"><i class="fa-solid fa-star"></i> <span id="rating-display-${m.id}">${m.rating}</span></span>
+                        </div>
+                        <button class="btn-visit" onclick="openMarketDetail('${m.id}')">Kunjungi</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Add spacer
+            container.innerHTML += '<div style="height: 20px;"></div>';
+
+            // Add Realtime Listener for each market's average rating
+            sortedMarkets.forEach(m => {
+                const reviewsRef = ref(db, `market_reviews/${m.id}`);
+                const listener = onValue(reviewsRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const reviews = Object.values(snapshot.val());
+                        if (reviews.length > 0) {
+                            const total = reviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+                            const avg = (total / reviews.length).toFixed(1);
+                            const el = document.getElementById(`rating-display-${m.id}`);
+                            if(el) el.innerText = avg;
+                        }
+                    }
+                });
+                globalRatingListeners.push(reviewsRef); // Store ref to detach later if needed
+            });
+        }
+
+        function openMarketDetail(marketId) {
+            hideAllSubPages();
+            document.getElementById('market-detail-view').style.display = 'block';
+            document.querySelector('.bottom-nav').style.display = 'none';
+            currentDetailMarketId = marketId;
+
+            // Load static data
+            const market = marketsData.find(m => m.id === marketId);
+            if (market) {
+                document.getElementById('detail-market-name-header').innerText = market.name;
+                document.getElementById('detail-market-name').innerText = market.name;
+                document.getElementById('detail-market-img').src = market.img;
+                // Calculate dist roughly again just for display or store it
+                // For simplicity, just showing generic text or recalculating if coords available
+                if (navigator.geolocation) {
+                     navigator.geolocation.getCurrentPosition((pos) => {
+                         const d = getDistanceFromLatLonInKm(pos.coords.latitude, pos.coords.longitude, market.lat, market.lng);
+                         document.getElementById('detail-market-dist').innerText = d.toFixed(1) + " km";
+                     });
+                }
+            }
+
+            // Reset Form
+            document.getElementById('review-comment').value = '';
+            selectStar(0);
+
+            // LISTEN TO REVIEWS
+            if (activeReviewListener) off(activeReviewListener);
+            
+            const reviewContainer = document.getElementById('review-list-container');
+            reviewContainer.innerHTML = '<div style="text-align:center; padding:20px;">Memuat ulasan...</div>';
+
+            const reviewsRef = ref(db, `market_reviews/${marketId}`);
+            activeReviewListener = reviewsRef; // Store to detach later
+
+            onValue(reviewsRef, (snapshot) => {
+                reviewContainer.innerHTML = '';
+                let totalStars = 0;
+                let count = 0;
+
+                if (snapshot.exists()) {
+                    const reviewsObj = snapshot.val();
+                    const reviews = Object.values(reviewsObj).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                    
+                    count = reviews.length;
+                    
+                    reviews.forEach(r => {
+                        totalStars += r.rating;
+                        const date = new Date(r.timestamp).toLocaleDateString('id-ID');
+                        
+                        // Generate Star Icons
+                        let starsHtml = '';
+                        for(let i=1; i<=5; i++) {
+                            if(i <= r.rating) starsHtml += '<i class="fa-solid fa-star"></i>';
+                            else starsHtml += '<i class="fa-regular fa-star"></i>';
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = 'review-card';
+                        card.innerHTML = `
+                            <div class="review-header">
+                                <span class="reviewer-name">${r.userName}</span>
+                                <span class="review-date">${date}</span>
+                            </div>
+                            <div class="review-text">${r.comment}</div>
+                            <div class="review-stars">${starsHtml}</div>
+                        `;
+                        reviewContainer.appendChild(card);
+                    });
+                } else {
+                    reviewContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">Belum ada ulasan. Jadilah yang pertama!</div>';
+                }
+
+                // Update Big Summary
+                const avg = count > 0 ? (totalStars / count).toFixed(1) : "0.0";
+                document.getElementById('detail-rating-avg').innerText = avg;
+                document.getElementById('detail-rating-count').innerText = count;
+                
+                // Update Big Stars
+                let bigStarsHtml = '';
+                for(let i=1; i<=5; i++) {
+                    if(i <= Math.round(avg)) bigStarsHtml += '<i class="fa-solid fa-star"></i>';
+                    else bigStarsHtml += '<i class="fa-regular fa-star"></i>';
+                }
+                document.getElementById('detail-rating-stars').innerHTML = bigStarsHtml;
+            });
+        }
+
+        function selectStar(rating) {
+            document.getElementById('selected-rating').value = rating;
+            for(let i=1; i<=5; i++) {
+                const el = document.getElementById(`star-${i}`);
+                if (i <= rating) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            }
+        }
+
+        async function submitReview() {
+            const rating = parseInt(document.getElementById('selected-rating').value);
+            const comment = document.getElementById('review-comment').value.trim();
+            const marketId = currentDetailMarketId;
+
+            if (rating === 0) {
+                showToast("Silakan pilih bintang (1-5)", "error");
+                return;
+            }
+            if (!comment) {
+                showToast("Tulis pengalaman belanja Anda", "error");
+                return;
+            }
+
+            const userJSON = localStorage.getItem(SESSION_KEY);
+            if (!userJSON) {
+                showLogin();
+                return;
+            }
+            const user = JSON.parse(userJSON);
+            const userKey = sanitizeEmail(user.email);
+
+            const reviewData = {
+                userId: userKey,
+                userName: user.name,
+                rating: rating,
+                comment: comment,
+                timestamp: new Date().toISOString()
+            };
+
+            showToast("Mengirim ulasan...", "info");
+
+            try {
+                // Save review under market_reviews/marketId/userId (One review per user per market)
+                await set(ref(db, `market_reviews/${marketId}/${userKey}`), reviewData);
+                
+                showToast("Terima kasih atas ulasan Anda!", "success");
+                
+                // Clear form
+                document.getElementById('review-comment').value = '';
+                selectStar(0);
+            } catch (error) {
+                console.error(error);
+                showToast("Gagal mengirim ulasan.", "error");
+            }
+        }
+
+        // --- UTILS ---
+        function loadRandomFact() {
+            const randomIndex = Math.floor(Math.random() * facts.length);
+            const fact = facts[randomIndex];
+            document.getElementById('fact-title').innerText = fact.title;
+            document.getElementById('fact-text').innerText = fact.text;
+        }
+
+        function refreshFact() {
+            const card = document.querySelector('.knowledge-card');
+            card.style.opacity = '0.7';
+            setTimeout(() => {
+                loadRandomFact();
+                card.style.opacity = '1';
+            }, 200);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let icon = 'fa-circle-info';
+            if (type === 'error') icon = 'fa-circle-exclamation';
+            if (type === 'success') icon = 'fa-circle-check';
+
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                toast.addEventListener('animationend', () => toast.remove());
+            }, 3000);
+        }
+
+        function showConfirmDialog(title, message, onConfirmCallback) {
+            const modal = document.getElementById('confirm-modal');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-msg').innerText = message;
+            document.getElementById('btn-modal-confirm').onclick = onConfirmCallback;
+            modal.classList.add('active');
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirm-modal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
